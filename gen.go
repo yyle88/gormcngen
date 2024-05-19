@@ -5,40 +5,78 @@ import (
 	"path/filepath"
 	"reflect"
 	"strings"
+	"sync"
 
+	"github.com/yyle88/done"
 	"github.com/yyle88/gormcngen/internal/utils"
 	"github.com/yyle88/gormcnm"
 	"gorm.io/gorm/schema"
 )
 
-func Gen(dest interface{}, isExportSubClass bool) string {
-	cfg := NewGenCfgs(dest, isExportSubClass)
-	codeDefineFunc, codeStructType, moreImportsMap := GenCode(cfg.sch, cfg.getCsFuncName, cfg.subStructName)
-	res := codeDefineFunc + "\n" + codeStructType
-	fmt.Println(res)
-	fmt.Println(moreImportsMap)
-	return res
+type Config struct {
+	sch         *schema.Schema
+	nmClassName string
+	clsFuncName string
 }
 
-func GenCode(sch *schema.Schema, csFuncName string, subStructName string) (string, string, map[string]bool) {
-	ShowSchema(sch)
-	pta := utils.NewPTX()
+func NewConfig(sch *schema.Schema, nmClassName string, clsFuncName string) *Config {
+	return &Config{
+		sch:         sch,
+		clsFuncName: clsFuncName,
+		nmClassName: nmClassName,
+	}
+}
 
-	pta.Println(fmt.Sprintf("type %s struct{", subStructName))
+func NewConfigXObject(dest interface{}, isSubClassExportable bool) *Config {
+	sch := done.VCE(schema.Parse(dest, &sync.Map{}, &schema.NamingStrategy{
+		SingularTable: false,
+		NoLowerCase:   false,
+	})).Nice()
+
+	const classSuffix = "Columns"
+	const clsFuncName = "Columns"
+
+	var nmClassName string
+	if !isSubClassExportable {
+		nmClassName = utils.CvtC0ToLowerString(sch.Name) + classSuffix
+	} else {
+		nmClassName = sch.Name + classSuffix //这里不用管，通常定义的结构体名称是导出的
+	}
+
+	return NewConfig(sch, nmClassName, clsFuncName)
+}
+
+type GenResType struct {
+	clsFuncCode string
+	nmClassCode string
+	moreImports map[string]bool
+}
+
+func (c *Config) Gen() *GenResType {
+	var sch *schema.Schema = c.sch
+	var clsFuncName string = c.clsFuncName
+	var nmClassName string = c.nmClassName
+
+	ShowSchema(sch)
+	pst := utils.NewPTX()
+
+	pst.Println(fmt.Sprintf("type %s struct{", nmClassName))
 
 	cbaType := reflect.TypeOf(gormcnm.ColumnBaseFuncClass{})
 	pkgName := filepath.Base(cbaType.PkgPath())
 
-	pta.Println(fmt.Sprintf("%s.%s //继承操作函数，让查询更便捷", pkgName, cbaType.Name()))
-	pta.Println("//模型各个列名和类型:")
+	const align = "   " //让代码对齐的，是3个空格，而不是4个空格，因为打印函数会增加1个空格。由于后面会格式化代码，这里的对齐也只是为了方便观察日志
 
-	ptx := utils.NewPTX()
-	ptx.Println(fmt.Sprintf("func (*%s) %s() *%s {", sch.Name, csFuncName, subStructName))
-	ptx.Println(fmt.Sprintf("	return &%s{", subStructName))
+	pst.Println(align, fmt.Sprintf("%s.%s //继承操作函数，让查询更便捷", pkgName, cbaType.Name()))
+	pst.Println(align, "//模型各个列名和类型:")
+
+	pfu := utils.NewPTX()
+	pfu.Println(fmt.Sprintf("func (*%s) %s() *%s {", sch.Name, clsFuncName, nmClassName))
+	pfu.Println(fmt.Sprintf("	return &%s{", nmClassName))
 
 	schemaPkgPath := sch.ModelType.PkgPath()
 
-	var moreImportsMap = make(map[string]bool)
+	var moreImports = make(map[string]bool)
 
 	for _, field := range sch.Fields {
 		var typName string
@@ -46,30 +84,35 @@ func GenCode(sch *schema.Schema, csFuncName string, subStructName string) (strin
 			typName = field.FieldType.Name() //只用类型名即可
 		} else {
 			if pkgPath != "" {
-				moreImportsMap[pkgPath] = true
+				moreImports[pkgPath] = true
 			}
 			typName = field.FieldType.String() //得用完整的名字
 		}
-		pta.Println(field.Name, fmt.Sprintf("%s.ColumnName[%s]", pkgName, typName))
+		pst.Println(align, field.Name, fmt.Sprintf("%s.ColumnName[%s]", pkgName, typName))
 
-		ptx.Println(fmt.Sprintf(`%s:"%s",`, field.Name, field.DBName))
+		pfu.Println(align, fmt.Sprintf(`%s:"%s",`, field.Name, field.DBName))
 	}
 
-	ptx.Println("	}")
-	ptx.Println("}")
-	pta.Println("}")
-	codeDefineFunc := strings.TrimSpace(ptx.String())
-	codeStructType := strings.TrimSpace(pta.String())
+	pfu.Println("	}")
+	pfu.Println("}")
+	pst.Println("}")
+
+	clsFuncCode := strings.TrimSpace(pfu.String())
+	nmClassCode := strings.TrimSpace(pst.String())
 
 	fmt.Println("---")
-	fmt.Println(codeDefineFunc)
+	fmt.Println(clsFuncCode)
 	fmt.Println("---")
-	fmt.Println(codeStructType)
+	fmt.Println(nmClassCode)
 	fmt.Println("---")
-	fmt.Println(moreImportsMap)
+	fmt.Println(moreImports)
 	fmt.Println("---")
 
-	return codeDefineFunc, codeStructType, moreImportsMap
+	return &GenResType{
+		clsFuncCode: clsFuncCode,
+		nmClassCode: nmClassCode,
+		moreImports: moreImports,
+	}
 }
 
 func ShowSchema(sch *schema.Schema) {

@@ -1,4 +1,4 @@
-package example3
+package example2
 
 import (
 	"time"
@@ -8,24 +8,24 @@ import (
 
 func (*Person) Columns() *PersonColumns {
 	return &PersonColumns{
-		ID:          "id",
-		Name:        "name",
-		DateOfBirth: "date_of_birth",
-		Gender:      "gender",
-		CreatedAt:   "created_at",
-		UpdatedAt:   "updated_at",
+		ID:        "id",
+		Name:      "name",
+		BirthDate: "birth_date",
+		Gender:    "gender",
+		CreatedAt: "created_at",
+		UpdatedAt: "updated_at",
 	}
 }
 
 type PersonColumns struct {
 	gormcnm.ColumnBaseFuncClass //继承操作函数，让查询更便捷
-	// 模型各个列名和类型:
-	ID          gormcnm.ColumnName[int32]
-	Name        gormcnm.ColumnName[string]
-	DateOfBirth gormcnm.ColumnName[string]
-	Gender      gormcnm.ColumnName[bool]
-	CreatedAt   gormcnm.ColumnName[time.Time]
-	UpdatedAt   gormcnm.ColumnName[time.Time]
+	//模型各个列名和类型:
+	ID        gormcnm.ColumnName[int32]
+	Name      gormcnm.ColumnName[string]
+	BirthDate gormcnm.ColumnName[string]
+	Gender    gormcnm.ColumnName[bool]
+	CreatedAt gormcnm.ColumnName[time.Time]
+	UpdatedAt gormcnm.ColumnName[time.Time]
 }
 
 func (*Example) Columns() *ExampleColumns {
@@ -39,7 +39,7 @@ func (*Example) Columns() *ExampleColumns {
 
 type ExampleColumns struct {
 	gormcnm.ColumnBaseFuncClass //继承操作函数，让查询更便捷
-	// 模型各个列名和类型:
+	//模型各个列名和类型:
 	ID        gormcnm.ColumnName[int32]
 	Name      gormcnm.ColumnName[string]
 	CreatedAt gormcnm.ColumnName[time.Time]

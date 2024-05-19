@@ -1,11 +1,9 @@
 package gormcngen
 
 import (
-	"fmt"
 	"go/ast"
 	"go/token"
 	"os"
-	"sync"
 
 	"github.com/yyle88/done"
 	"github.com/yyle88/formatgo"
@@ -13,110 +11,83 @@ import (
 	"github.com/yyle88/gormcnm"
 	"github.com/yyle88/slicesort"
 	"github.com/yyle88/syntaxgo/syntaxgo_ast"
-	"gorm.io/gorm/schema"
 )
 
-type GenCfg struct {
-	sch           *schema.Schema
-	getCsFuncName string
-	subStructName string
+type Configs struct {
+	configs          []*Config
+	writeClsFuncPath string
+	writeNmClassPath string
 }
 
-type GenCfgs struct {
-	cfgs          []*GenCfg
-	CsFuncPath    string
-	SubStructPath string
-}
-
-func NewGenCfgs(dest interface{}, isExportSubClass bool) *GenCfg {
-	sch, err := schema.Parse(dest, &sync.Map{}, &schema.NamingStrategy{
-		SingularTable: false,
-		NoLowerCase:   false,
-	})
-	done.Done(err)
-
-	csFuncName := "Columns"
-	structName := fmt.Sprintf("%sColumns", sch.Name)
-	if !isExportSubClass {
-		structName = utils.CvtC0ToLowerString(structName)
-	}
-
-	return &GenCfg{
-		sch:           sch,
-		getCsFuncName: csFuncName,
-		subStructName: structName,
-	}
-}
-
-func NewGenCfgsXPath(models []interface{}, path string, isExportSubClass bool) *GenCfgs {
-	cfgs := make([]*GenCfg, 0, len(models))
+func NewConfigsXPath(models []interface{}, path string, isSubClassExportable bool) *Configs {
+	cfgs := make([]*Config, 0, len(models))
 	for _, dest := range models {
-		cfgs = append(cfgs, NewGenCfgs(dest, isExportSubClass))
+		cfgs = append(cfgs, NewConfigXObject(dest, isSubClassExportable))
 	}
-	return &GenCfgs{
-		cfgs:          cfgs,
-		CsFuncPath:    path,
-		SubStructPath: path,
+	return &Configs{
+		configs:          cfgs,
+		writeClsFuncPath: path,
+		writeNmClassPath: path,
 	}
 }
 
-func (cfgs *GenCfgs) GenWrite() {
+func (cs *Configs) Gen() {
 	type elemType struct {
-		srcPath string          //代码文件路径
-		astNode ast.Node        //代码块所在的起止位置
-		exist   bool            //代码块是否找到
-		newCode string          //新代码块内容
-		impsMap map[string]bool //新增的引用部分
+		srcPath     string          //代码文件路径
+		astNode     ast.Node        //代码块所在的起止位置
+		exist       bool            //代码块是否找到
+		newSrcBlock string          //新代码块内容
+		moreImports map[string]bool //新增的引用部分
 	}
 
-	var elems = make([]*elemType, 0, len(cfgs.cfgs)*2)
+	var elems = make([]*elemType, 0, len(cs.configs)*2) //因为是类型和函数两个操作，这里*2
 
-	for idx, cfg := range cfgs.cfgs {
-		codeDefineFunc, codeStructType, moreImportsMap := GenCode(cfg.sch, cfg.getCsFuncName, cfg.subStructName)
-		if path := cfgs.CsFuncPath; path != "" {
+	for idx, cfg := range cs.configs {
+		res := cfg.Gen()
+		if path := cs.writeClsFuncPath; path != "" {
 			astFile, err := syntaxgo_ast.NewAstXFilepath(path)
 			done.Done(err)
 
-			astFunc, ok := syntaxgo_ast.SeekFuncXRecvNameXFuncName(astFile, cfg.sch.Name, cfg.getCsFuncName)
+			astFunc, ok := syntaxgo_ast.SeekFuncXRecvNameXFuncName(astFile, cfg.sch.Name, cfg.clsFuncName)
 			if ok {
 				elems = append(elems, &elemType{
-					srcPath: path,
-					astNode: astFunc,
-					exist:   true,
-					newCode: codeDefineFunc,
-					impsMap: moreImportsMap,
+					srcPath:     path,
+					astNode:     astFunc,
+					exist:       true,
+					newSrcBlock: res.clsFuncCode,
+					moreImports: res.moreImports,
 				})
 			} else {
 				elems = append(elems, &elemType{
-					srcPath: path,
-					astNode: syntaxgo_ast.NewNode(token.Pos(100*idx)+1, 0), //给个假的，做排序用
-					exist:   false,
-					newCode: codeDefineFunc,
-					impsMap: moreImportsMap,
+					srcPath:     path,
+					astNode:     syntaxgo_ast.NewNode(token.Pos(100*idx)+1, 0), //给个假的，做排序用
+					exist:       false,
+					newSrcBlock: res.clsFuncCode,
+					moreImports: res.moreImports,
 				})
 			}
 		}
-		if path := cfgs.SubStructPath; path != "" {
+		if path := cs.writeNmClassPath; path != "" {
 			astFile, err := syntaxgo_ast.NewAstXFilepath(path)
 			done.Done(err)
 
 			structDeclsTypes := syntaxgo_ast.SeekMapStructNameDeclsTypes(astFile)
-			structType, ok := structDeclsTypes[cfg.subStructName]
+			structType, ok := structDeclsTypes[cfg.nmClassName]
 			if ok {
 				elems = append(elems, &elemType{
-					srcPath: path,
-					astNode: structType,
-					exist:   true,
-					newCode: codeStructType,
-					impsMap: moreImportsMap,
+					srcPath:     path,
+					astNode:     structType,
+					exist:       true,
+					newSrcBlock: res.nmClassCode,
+					moreImports: res.moreImports,
 				})
 			} else {
 				elems = append(elems, &elemType{
-					srcPath: path,
-					astNode: syntaxgo_ast.NewNode(token.Pos(100*idx)+2, 0), //给个假的，做排序用
-					exist:   false,
-					newCode: codeStructType,
-					impsMap: moreImportsMap,
+					srcPath:     path,
+					astNode:     syntaxgo_ast.NewNode(token.Pos(100*idx)+2, 0), //给个假的，做排序用
+					exist:       false,
+					newSrcBlock: res.nmClassCode,
+					moreImports: res.moreImports,
 				})
 			}
 		}
@@ -134,36 +105,40 @@ func (cfgs *GenCfgs) GenWrite() {
 		}
 	})
 
-	var sourcesMap = map[string][]byte{}
-	var importsMap = map[string]map[string]bool{}
+	type srcTuple struct {
+		source      []byte          //某个文件的完整源码
+		moreImports map[string]bool //需要新增的引用包们
+	}
+
+	var srcMap = map[string]*srcTuple{} //路径和内容
 	for _, elem := range elems {
-		if _, ok := sourcesMap[elem.srcPath]; !ok {
-			sourcesMap[elem.srcPath] = done.VAE(os.ReadFile(elem.srcPath)).Done()
-			importsMap[elem.srcPath] = map[string]bool{} //这里只需要初始化个空的就行
+		if _, ok := srcMap[elem.srcPath]; !ok {
+			srcMap[elem.srcPath] = &srcTuple{
+				source:      done.VAE(os.ReadFile(elem.srcPath)).Done(), //读取源代码内容
+				moreImports: map[string]bool{},                          //这里只需要初始化个空的就行，稍后再补充内容
+			}
 		}
 	}
 
 	for _, elem := range elems {
-		source := sourcesMap[elem.srcPath]
-		if elem.exist {
-			source = syntaxgo_ast.ChangeNodeBytesXNewLines(source, elem.astNode, []byte(elem.newCode), 2)
-		} else {
-			source = append(source, byte('\n'), byte('\n'))
-			codeBlockBytes := []byte(elem.newCode)
-			source = append(source, codeBlockBytes...)
+		srcNode := srcMap[elem.srcPath]
+		if elem.exist { //假如存在就替换它，替换代码块的全部内容
+			srcNode.source = syntaxgo_ast.ChangeNodeBytesXNewLines(srcNode.source, elem.astNode, []byte(elem.newSrcBlock), 2)
+		} else { //假如不存在就追加它，把内容追加到文件末尾
+			srcNode.source = append(srcNode.source, byte('\n'), byte('\n'))
+			codeBlockBytes := []byte(elem.newSrcBlock)
+			srcNode.source = append(srcNode.source, codeBlockBytes...)
 		}
-		sourcesMap[elem.srcPath] = source
-		mp := importsMap[elem.srcPath]
-		for pkgPath := range elem.impsMap {
-			mp[pkgPath] = true //这里只需要追加就行
+		for pkgPath := range elem.moreImports {
+			srcNode.moreImports[pkgPath] = true //这里只需要追加就行
 		}
 	}
 
-	for absPath, source := range sourcesMap {
-		source = syntaxgo_ast.AddImports(
-			source,
+	for absPath, srcNode := range srcMap {
+		source := syntaxgo_ast.AddImports(
+			srcNode.source,
 			&syntaxgo_ast.PackageImportOptions{
-				Packages:   utils.GetMapKeys(importsMap[absPath]),
+				Packages:   utils.GetMapKeys(srcNode.moreImports),
 				UsingTypes: nil,
 				Objects:    []any{gormcnm.ColumnBaseFuncClass{}},
 			},
