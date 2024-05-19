@@ -1,22 +1,10 @@
-package utilsgormcngen
+package utils
 
 import (
 	"encoding/json"
 
 	"github.com/pkg/errors"
 )
-
-func AssertDone(err error) {
-	if err != nil {
-		panic(errors.WithMessage(err, "wrong"))
-	}
-}
-
-func AssertEquals[T comparable](a, b T) {
-	if a != b {
-		panic(errors.New("not equals"))
-	}
-}
 
 func SoftNeatString(v interface{}) string {
 	data, err := NeatBytes(v)

@@ -6,7 +6,7 @@ import (
 	"go/token"
 	"sync"
 
-	"github.com/yyle88/gormcngen/utilsgormcngen"
+	"github.com/yyle88/done"
 	"github.com/yyle88/gormcnm"
 	"gitlab.yyle.com/golang/uvcode.git/utils_gen"
 	"gitlab.yyle.com/golang/uvyyle.git/utils_file"
@@ -34,7 +34,7 @@ func NewGenCfgs(dest interface{}, isExportSubClass bool) *GenCfg {
 		SingularTable: false,
 		NoLowerCase:   false,
 	})
-	utilsgormcngen.AssertDone(err)
+	done.Done(err)
 
 	csFuncName := "Columns"
 	structName := fmt.Sprintf("%sColumns", sch.Name)
@@ -76,7 +76,7 @@ func (cfgs *GenCfgs) GenWrite() {
 		codeDefineFunc, codeStructType, moreImportsMap := GenCode(cfg.sch, cfg.getCsFuncName, cfg.subStructName)
 		if path := cfgs.CsFuncPath; path != "" {
 			astFile, err := utils_golang_ast.NewAstXFilepath(path)
-			utilsgormcngen.AssertDone(err)
+			done.Done(err)
 
 			astFunc, ok := utils_golang_ast.SeekFuncXRecvNameXFuncName(astFile, cfg.sch.Name, cfg.getCsFuncName, false)
 			if ok {
@@ -99,7 +99,7 @@ func (cfgs *GenCfgs) GenWrite() {
 		}
 		if path := cfgs.SubStructPath; path != "" {
 			astFile, err := utils_golang_ast.NewAstXFilepath(path)
-			utilsgormcngen.AssertDone(err)
+			done.Done(err)
 
 			structDeclsTypes := utils_golang_ast.SeekStructDeclsTypes(astFile)
 			structType, ok := structDeclsTypes[cfg.subStructName]
