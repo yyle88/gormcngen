@@ -5,14 +5,14 @@ import (
 	"time"
 
 	"github.com/gofrs/uuid"
-	"github.com/yyle88/gormcnm"
+	"github.com/yyle88/runpath"
+	"gitlab.yyle.com/golang/uvxlan.git/utils_gorm/utils_gorm/utils_gorm_cname"
 	"gitlab.yyle.com/golang/uvyyle.git/utils_file"
-	"gitlab.yyle.com/golang/uvyyle.git/utils_runtime/utils_runtestpath"
 	"gorm.io/gorm"
 )
 
 func TestGenWrite(t *testing.T) {
-	absPath := utils_runtestpath.TestPath(t)
+	absPath := runpath.Path()
 	utils_file.EXISTS.MustFile(absPath)
 	t.Log(absPath)
 
@@ -33,13 +33,13 @@ func (*Person) Columns() *PersonColumns {
 }
 
 type PersonColumns struct {
-	gormcnm.ColumnBaseFuncClass //继承操作函数，让查询更便捷
+	utils_gorm_cname.ColumnBaseFuncClass //继承操作函数，让查询更便捷
 	// 模型各个列名和类型:
-	ID          gormcnm.ColumnName[uuid.UUID]
-	Name        gormcnm.ColumnName[string]
-	DateOfBirth gormcnm.ColumnName[string]
-	Gender      gormcnm.ColumnName[bool]
-	CreatedAt   gormcnm.ColumnName[time.Time]
-	UpdatedAt   gormcnm.ColumnName[time.Time]
-	DeletedAt   gormcnm.ColumnName[gorm.DeletedAt]
+	ID          utils_gorm_cname.ColumnName[uuid.UUID]
+	Name        utils_gorm_cname.ColumnName[string]
+	DateOfBirth utils_gorm_cname.ColumnName[string]
+	Gender      utils_gorm_cname.ColumnName[bool]
+	CreatedAt   utils_gorm_cname.ColumnName[time.Time]
+	UpdatedAt   utils_gorm_cname.ColumnName[time.Time]
+	DeletedAt   utils_gorm_cname.ColumnName[gorm.DeletedAt]
 }

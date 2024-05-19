@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"path/filepath"
 	"reflect"
+	"strings"
 
+	"github.com/yyle88/gormcngen/internal/utils"
 	"github.com/yyle88/gormcnm"
-	"gitlab.yyle.com/golang/uvyyle.git/utils_print"
 	"gorm.io/gorm/schema"
 )
 
@@ -21,7 +22,7 @@ func Gen(dest interface{}, isExportSubClass bool) string {
 
 func GenCode(sch *schema.Schema, csFuncName string, subStructName string) (string, string, map[string]bool) {
 	ShowSchema(sch)
-	pta := utils_print.NewPTX().Must()
+	pta := utils.NewPTX()
 
 	pta.Println(fmt.Sprintf("type %s struct{", subStructName))
 
@@ -31,7 +32,7 @@ func GenCode(sch *schema.Schema, csFuncName string, subStructName string) (strin
 	pta.Println(fmt.Sprintf("%s.%s //继承操作函数，让查询更便捷", pkgName, cbaType.Name()))
 	pta.Println("//模型各个列名和类型:")
 
-	ptx := utils_print.NewPTX().Must()
+	ptx := utils.NewPTX()
 	ptx.Println(fmt.Sprintf("func (*%s) %s() *%s {", sch.Name, csFuncName, subStructName))
 	ptx.Println(fmt.Sprintf("	return &%s{", subStructName))
 
@@ -57,8 +58,8 @@ func GenCode(sch *schema.Schema, csFuncName string, subStructName string) (strin
 	ptx.Println("	}")
 	ptx.Println("}")
 	pta.Println("}")
-	codeDefineFunc := ptx.GetSxTrim()
-	codeStructType := pta.GetSxTrim()
+	codeDefineFunc := strings.TrimSpace(ptx.String())
+	codeStructType := strings.TrimSpace(pta.String())
 
 	fmt.Println("---")
 	fmt.Println(codeDefineFunc)

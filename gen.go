@@ -7,10 +7,10 @@ import (
 	"sync"
 
 	"github.com/yyle88/done"
-	"github.com/yyle88/gormcnm"
+	"github.com/yyle88/syntaxgo/syntaxgo_ast"
 	"gitlab.yyle.com/golang/uvcode.git/utils_gen"
+	"gitlab.yyle.com/golang/uvxlan.git/utils_gorm/utils_gorm/utils_gorm_cname"
 	"gitlab.yyle.com/golang/uvyyle.git/utils_file"
-	"gitlab.yyle.com/golang/uvyyle.git/utils_golang/utils_golang_ast"
 	"gitlab.yyle.com/golang/uvyyle.git/utils_map"
 	"gitlab.yyle.com/golang/uvyyle.git/utils_sort/utils_sortslice"
 	"gitlab.yyle.com/golang/uvyyle.git/utils_strings"
@@ -75,10 +75,10 @@ func (cfgs *GenCfgs) GenWrite() {
 	for idx, cfg := range cfgs.cfgs {
 		codeDefineFunc, codeStructType, moreImportsMap := GenCode(cfg.sch, cfg.getCsFuncName, cfg.subStructName)
 		if path := cfgs.CsFuncPath; path != "" {
-			astFile, err := utils_golang_ast.NewAstXFilepath(path)
+			astFile, err := syntaxgo_ast.NewAstXFilepath(path)
 			done.Done(err)
 
-			astFunc, ok := utils_golang_ast.SeekFuncXRecvNameXFuncName(astFile, cfg.sch.Name, cfg.getCsFuncName, false)
+			astFunc, ok := syntaxgo_ast.SeekFuncXRecvNameXFuncName(astFile, cfg.sch.Name, cfg.getCsFuncName)
 			if ok {
 				elems = append(elems, &elemType{
 					srcPath: path,
@@ -90,7 +90,7 @@ func (cfgs *GenCfgs) GenWrite() {
 			} else {
 				elems = append(elems, &elemType{
 					srcPath: path,
-					astNode: utils_golang_ast.NewNode(token.Pos(100*idx)+1, 0), //给个假的，做排序用
+					astNode: syntaxgo_ast.NewNode(token.Pos(100*idx)+1, 0), //给个假的，做排序用
 					exist:   false,
 					newCode: codeDefineFunc,
 					impsMap: moreImportsMap,
@@ -98,10 +98,10 @@ func (cfgs *GenCfgs) GenWrite() {
 			}
 		}
 		if path := cfgs.SubStructPath; path != "" {
-			astFile, err := utils_golang_ast.NewAstXFilepath(path)
+			astFile, err := syntaxgo_ast.NewAstXFilepath(path)
 			done.Done(err)
 
-			structDeclsTypes := utils_golang_ast.SeekStructDeclsTypes(astFile)
+			structDeclsTypes := syntaxgo_ast.SeekMapStructNameDeclsTypes(astFile)
 			structType, ok := structDeclsTypes[cfg.subStructName]
 			if ok {
 				elems = append(elems, &elemType{
@@ -114,7 +114,7 @@ func (cfgs *GenCfgs) GenWrite() {
 			} else {
 				elems = append(elems, &elemType{
 					srcPath: path,
-					astNode: utils_golang_ast.NewNode(token.Pos(100*idx)+2, 0), //给个假的，做排序用
+					astNode: syntaxgo_ast.NewNode(token.Pos(100*idx)+2, 0), //给个假的，做排序用
 					exist:   false,
 					newCode: codeStructType,
 					impsMap: moreImportsMap,
@@ -123,7 +123,7 @@ func (cfgs *GenCfgs) GenWrite() {
 		}
 	}
 	//其实不同文件中的操作，合在一起排序，有一些取巧的成分，但认为这样做比较简单，因此没有严格区分文件，而是先排序再分文件的
-	utils_sortslice.NewSortSlice[*elemType](elems, func(a, b *elemType) bool {
+	utils_sortslice.NewSortVLess[*elemType](elems, func(a, b *elemType) bool {
 		if a.exist != b.exist {
 			return a.exist //认为已存在的要放在前面，而不存在的要放在后面，毕竟都是可以随便补充的
 		} else {
@@ -147,7 +147,7 @@ func (cfgs *GenCfgs) GenWrite() {
 	for _, elem := range elems {
 		source := sourcesMap[elem.srcPath]
 		if elem.exist {
-			source = utils_golang_ast.ChangeNodeBytesXNewLines(source, elem.astNode, []byte(elem.newCode), 2)
+			source = syntaxgo_ast.ChangeNodeBytesXNewLines(source, elem.astNode, []byte(elem.newCode), 2)
 		} else {
 			source = append(source, byte('\n'), byte('\n'))
 			codeBlockBytes := []byte(elem.newCode)
@@ -161,11 +161,13 @@ func (cfgs *GenCfgs) GenWrite() {
 	}
 
 	for filename, source := range sourcesMap {
-		source = utils_golang_ast.AddImportsToSource3(
-			filename,
+		source = syntaxgo_ast.AddImports(
 			source,
-			utils_map.Keys(importsMap[filename]),
-			[]any{gormcnm.ColumnBaseFuncClass{}},
+			&syntaxgo_ast.PackageImportOptions{
+				Packages:   utils_map.Keys(importsMap[filename]),
+				UsingTypes: nil,
+				Objects:    []any{utils_gorm_cname.ColumnBaseFuncClass{}},
+			},
 		)
 		utils_gen.WriteBytes(filename, source)
 	}

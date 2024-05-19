@@ -4,12 +4,12 @@ import (
 	"testing"
 
 	"github.com/yyle88/gormcngen"
+	"github.com/yyle88/runpath/runtestpath"
 	"gitlab.yyle.com/golang/uvyyle.git/utils_file"
-	"gitlab.yyle.com/golang/uvyyle.git/utils_runtime/utils_runtestpath"
 )
 
 func TestGenerate(t *testing.T) {
-	absPath := utils_runtestpath.SrcPath(t)
+	absPath := runtestpath.SrcPath(t)
 	utils_file.EXISTS.MustFile(absPath)
 	t.Log(absPath)
 

@@ -1,7 +1,6 @@
 package gormcngen
 
 import (
-	"os"
 	"testing"
 	"time"
 
@@ -11,7 +10,7 @@ import (
 
 func TestMain(m *testing.M) {
 	m.Run()
-	os.Exit(0)
+	// os.Exit(0) //自从某个go版本开始就不需要再显式调用
 }
 
 func TestGen(t *testing.T) {
