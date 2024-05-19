@@ -1,25 +1,26 @@
 package example
 
 import (
-	"fmt"
 	"testing"
 
+	"github.com/stretchr/testify/require"
+	"github.com/yyle88/done"
+	"github.com/yyle88/formatgo"
 	"github.com/yyle88/gormcngen"
 	"github.com/yyle88/gormcngen/internal/utils"
 	"github.com/yyle88/runpath/runtestpath"
-	"gitlab.yyle.com/golang/uvcode.git/utils_gen"
-	"gitlab.yyle.com/golang/uvyyle.git/utils_file"
-	"gitlab.yyle.com/golang/uvyyle.git/utils_file/utils_filepath"
+	"github.com/yyle88/syntaxgo"
 )
 
 func TestGenerate(t *testing.T) {
 	absPath := runtestpath.SrcPath(t)
-	utils_file.EXISTS.MustFile(absPath)
 	t.Log(absPath)
+	require.True(t, utils.IsFileExist(absPath))
 
 	ptx := utils.NewPTX()
-	ptx.Println(fmt.Sprintf("package %s", utils_filepath.PATH.Name(utils_filepath.PARENT.Path(absPath))))
+	ptx.Println("package", syntaxgo.GetPkgName(absPath))
 	ptx.Println(gormcngen.Gen(&Person{}, true))
 
-	utils_gen.WriteSource(absPath, ptx.GetString())
+	newSource := done.VAE(formatgo.FormatBytes(ptx.Bytes())).Nice()
+	done.Done(utils.WriteFile(absPath, newSource))
 }

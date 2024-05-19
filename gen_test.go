@@ -4,17 +4,37 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gofrs/uuid"
+	"github.com/google/uuid"
+	"github.com/stretchr/testify/require"
+	"github.com/yyle88/gormcngen/internal/utils"
+	"github.com/yyle88/gormcnm"
 	"github.com/yyle88/runpath"
-	"gitlab.yyle.com/golang/uvxlan.git/utils_gorm/utils_gorm/utils_gorm_cname"
-	"gitlab.yyle.com/golang/uvyyle.git/utils_file"
 	"gorm.io/gorm"
 )
 
+func TestMain(m *testing.M) {
+	m.Run()
+}
+
+func TestGen(t *testing.T) {
+	t.Log(Gen(&Person{}, false))
+}
+
+type Person struct {
+	ID          uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4()"`
+	Name        string    `gorm:"not null,type:text"`
+	DateOfBirth string
+	Gender      bool
+	CreatedAt   time.Time      `gorm:"autoCreateTime"`
+	UpdatedAt   time.Time      `gorm:"autoUpdateTime"`
+	DeletedAt   gorm.DeletedAt `gorm:"index,->"`
+}
+
 func TestGenWrite(t *testing.T) {
 	absPath := runpath.Path()
-	utils_file.EXISTS.MustFile(absPath)
 	t.Log(absPath)
+
+	require.True(t, utils.IsFileExist(absPath))
 
 	cfg := NewGenCfgsXPath([]interface{}{&Person{}}, absPath, true)
 	cfg.GenWrite()
@@ -33,13 +53,13 @@ func (*Person) Columns() *PersonColumns {
 }
 
 type PersonColumns struct {
-	utils_gorm_cname.ColumnBaseFuncClass //继承操作函数，让查询更便捷
+	gormcnm.ColumnBaseFuncClass //继承操作函数，让查询更便捷
 	// 模型各个列名和类型:
-	ID          utils_gorm_cname.ColumnName[uuid.UUID]
-	Name        utils_gorm_cname.ColumnName[string]
-	DateOfBirth utils_gorm_cname.ColumnName[string]
-	Gender      utils_gorm_cname.ColumnName[bool]
-	CreatedAt   utils_gorm_cname.ColumnName[time.Time]
-	UpdatedAt   utils_gorm_cname.ColumnName[time.Time]
-	DeletedAt   utils_gorm_cname.ColumnName[gorm.DeletedAt]
+	ID          gormcnm.ColumnName[uuid.UUID]
+	Name        gormcnm.ColumnName[string]
+	DateOfBirth gormcnm.ColumnName[string]
+	Gender      gormcnm.ColumnName[bool]
+	CreatedAt   gormcnm.ColumnName[time.Time]
+	UpdatedAt   gormcnm.ColumnName[time.Time]
+	DeletedAt   gormcnm.ColumnName[gorm.DeletedAt]
 }
