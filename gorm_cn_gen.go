@@ -155,7 +155,7 @@ func (cs *Configs) Gen() {
 			&syntaxgo_ast.PackageImportOptions{
 				Packages:   utils.GetMapKeys(srcNode.moreImports),
 				UsingTypes: nil,
-				Objects:    []any{gormcnm.ColumnBaseFuncClass{}},
+				Objects:    []any{gormcnm.ColumnOperationClass{}},
 			},
 		)
 		newSource := done.VAE(formatgo.FormatBytes(source)).Nice()

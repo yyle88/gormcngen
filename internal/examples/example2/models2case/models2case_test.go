@@ -1,7 +1,6 @@
 package models2case
 
 import (
-	"os"
 	"testing"
 	"time"
 
@@ -17,10 +16,12 @@ import (
 var caseDB *gorm.DB
 
 func TestMain(m *testing.M) {
-	db, err := gorm.Open(sqlite.Open("file::memory:?cache=shared"), &gorm.Config{
+	db := done.VCE(gorm.Open(sqlite.Open("file::memory:?cache=shared"), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Info),
-	})
-	done.Done(err)
+	})).Nice()
+	defer func() {
+		done.Done(done.VCE(db.DB()).Nice().Close())
+	}()
 
 	done.Done(db.AutoMigrate(&example1.Person{}))
 	done.Done(db.Save(&example1.Person{
@@ -42,7 +43,6 @@ func TestMain(m *testing.M) {
 
 	caseDB = db
 	m.Run()
-	os.Exit(0)
 }
 
 func TestSelect(t *testing.T) {

@@ -63,7 +63,7 @@ func (c *Config) Gen() *GenResType {
 
 	pst.Println(fmt.Sprintf("type %s struct{", nmClassName))
 
-	cbaType := reflect.TypeOf(gormcnm.ColumnBaseFuncClass{})
+	cbaType := reflect.TypeOf(gormcnm.ColumnOperationClass{})
 	pkgName := filepath.Base(cbaType.PkgPath())
 
 	const align = "   " //让代码对齐的，是3个空格，而不是4个空格，因为打印函数会增加1个空格。由于后面会格式化代码，这里的对齐也只是为了方便观察日志
