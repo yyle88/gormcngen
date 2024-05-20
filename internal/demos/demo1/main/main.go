@@ -5,7 +5,7 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/yyle88/done"
-	"github.com/yyle88/gormcngen/internal/demos/main/models"
+	"github.com/yyle88/gormcngen/internal/demos/demo1/models"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
