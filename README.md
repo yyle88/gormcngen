@@ -6,7 +6,7 @@
 
 接下来告诉你如何使用。
 
-其实内容都在: [这个demo目录里啦](/internal/demos/demo1)
+其实内容都在: [这个demo目录里面](/internal/demos/demo1)
 
 首先请看这里: [最简单的demo模型](/internal/demos/demo1/models/example.go) 
 
