@@ -19,7 +19,7 @@ type Configs struct {
 	writeNmClassPath string
 }
 
-func NewConfigsXPath(models []interface{}, path string, isSubClassExportable bool) *Configs {
+func NewConfigs(models []interface{}, path string, isSubClassExportable bool) *Configs {
 	cfgs := make([]*Config, 0, len(models))
 	for _, dest := range models {
 		cfgs = append(cfgs, NewConfigXObject(dest, isSubClassExportable))

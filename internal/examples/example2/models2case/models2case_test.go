@@ -1,4 +1,4 @@
-package example2case
+package models2case
 
 import (
 	"os"

@@ -14,6 +14,6 @@ func TestGenerate(t *testing.T) {
 	t.Log(absPath)
 	require.True(t, utils.IsFileExist(absPath))
 
-	cfg := gormcngen.NewConfigsXPath([]interface{}{&Person{}, &Example{}}, absPath, true)
+	cfg := gormcngen.NewConfigs([]interface{}{&Person{}, &Example{}}, absPath, true)
 	cfg.Gen()
 }
