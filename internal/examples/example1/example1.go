@@ -15,8 +15,8 @@ type Person struct {
 	UpdatedAt time.Time `gorm:"autoUpdateTime"`
 }
 
-func (*Person) Columns() *PersonColumns {
-	return &PersonColumns{
+func (*Person) Columns() *personColumns {
+	return &personColumns{
 		ID:        "id",
 		Name:      "name",
 		BirthDate: "birth_date",
@@ -26,7 +26,7 @@ func (*Person) Columns() *PersonColumns {
 	}
 }
 
-type PersonColumns struct {
+type personColumns struct {
 	gormcnm.ColumnBaseFuncClass //继承操作函数，让查询更便捷
 	// 模型各个列名和类型:
 	ID        gormcnm.ColumnName[int32]
@@ -44,8 +44,8 @@ type Example struct {
 	UpdatedAt time.Time `gorm:"autoUpdateTime"`
 }
 
-func (*Example) Columns() *ExampleColumns {
-	return &ExampleColumns{
+func (*Example) Columns() *exampleColumns {
+	return &exampleColumns{
 		ID:        "id",
 		Name:      "name",
 		CreatedAt: "created_at",
@@ -53,7 +53,7 @@ func (*Example) Columns() *ExampleColumns {
 	}
 }
 
-type ExampleColumns struct {
+type exampleColumns struct {
 	gormcnm.ColumnBaseFuncClass //继承操作函数，让查询更便捷
 	// 模型各个列名和类型:
 	ID        gormcnm.ColumnName[int32]

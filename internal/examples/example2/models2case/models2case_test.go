@@ -21,10 +21,9 @@ func TestMain(m *testing.M) {
 		Logger: logger.Default.LogMode(logger.Info),
 	})
 	done.Done(err)
-	caseDB = db
 
 	done.Done(db.AutoMigrate(&example1.Person{}))
-	done.Done(caseDB.Save(&example1.Person{
+	done.Done(db.Save(&example1.Person{
 		ID:        0,
 		Name:      "abc",
 		BirthDate: "1970-01-01",
@@ -32,7 +31,7 @@ func TestMain(m *testing.M) {
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}).Error)
-	done.Done(caseDB.Save(&example1.Person{
+	done.Done(db.Save(&example1.Person{
 		ID:        0,
 		Name:      "aaa",
 		BirthDate: "2023-12-28",
@@ -40,6 +39,8 @@ func TestMain(m *testing.M) {
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}).Error)
+
+	caseDB = db
 	m.Run()
 	os.Exit(0)
 }

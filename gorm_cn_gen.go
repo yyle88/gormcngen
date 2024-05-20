@@ -14,21 +14,36 @@ import (
 )
 
 type Configs struct {
-	configs          []*Config
-	writeClsFuncPath string
-	writeNmClassPath string
+	configs              []*Config
+	writeColumnsFuncPath string
+	writeClassPath       string
 }
 
-func NewConfigs(models []interface{}, path string, isSubClassExportable bool) *Configs {
+func NewConfigs(models []interface{}, isSubClassExportable bool, outputPath string) *Configs {
 	cfgs := make([]*Config, 0, len(models))
 	for _, dest := range models {
 		cfgs = append(cfgs, NewConfigXObject(dest, isSubClassExportable))
 	}
+	return NewConfigsFromConfigs(cfgs).SetFuncPath(outputPath).SetClassPath(outputPath)
+}
+
+// NewConfigsFromConfigs 假如用户不想用默认的schema风格时，或者想单独设置路径时，也可以使用自定义的
+func NewConfigsFromConfigs(cfgs []*Config) *Configs {
 	return &Configs{
-		configs:          cfgs,
-		writeClsFuncPath: path,
-		writeNmClassPath: path,
+		configs:              cfgs,
+		writeColumnsFuncPath: "", //暂不设置，这样能够简化参数
+		writeClassPath:       "", //暂不设置，这样能够简化参数
 	}
+}
+
+func (cs *Configs) SetFuncPath(path string) *Configs {
+	cs.writeColumnsFuncPath = path
+	return cs
+}
+
+func (cs *Configs) SetClassPath(path string) *Configs {
+	cs.writeClassPath = path
+	return cs
 }
 
 func (cs *Configs) Gen() {
@@ -44,7 +59,7 @@ func (cs *Configs) Gen() {
 
 	for idx, cfg := range cs.configs {
 		res := cfg.Gen()
-		if path := cs.writeClsFuncPath; path != "" {
+		if path := cs.writeColumnsFuncPath; path != "" {
 			astFile, err := syntaxgo_ast.NewAstXFilepath(path)
 			done.Done(err)
 
@@ -67,7 +82,7 @@ func (cs *Configs) Gen() {
 				})
 			}
 		}
-		if path := cs.writeNmClassPath; path != "" {
+		if path := cs.writeClassPath; path != "" {
 			astFile, err := syntaxgo_ast.NewAstXFilepath(path)
 			done.Done(err)
 
