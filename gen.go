@@ -33,6 +33,8 @@ func NewConfigXObject(dest interface{}, isSubClassExportable bool) *Config {
 		NoLowerCase:   false,
 	})).Nice()
 
+	ShowSchemaMessage(sch)
+
 	const classSuffix = "Columns"
 	const clsFuncName = "Columns"
 
@@ -57,7 +59,6 @@ func (c *Config) Gen() *GenResType {
 	var clsFuncName string = c.clsFuncName
 	var nmClassName string = c.nmClassName
 
-	ShowSchema(sch)
 	pst := utils.NewPTX()
 
 	pst.Println(fmt.Sprintf("type %s struct{", nmClassName))
@@ -68,7 +69,7 @@ func (c *Config) Gen() *GenResType {
 	const align = "   " //让代码对齐的，是3个空格，而不是4个空格，因为打印函数会增加1个空格。由于后面会格式化代码，这里的对齐也只是为了方便观察日志
 
 	pst.Println(align, fmt.Sprintf("%s.%s //继承操作函数，让查询更便捷", pkgName, cbaType.Name()))
-	pst.Println(align, "//模型各个列名和类型:")
+	pst.Println(align, "// 模型各个列名和类型:")
 
 	pfu := utils.NewPTX()
 	pfu.Println(fmt.Sprintf("func (*%s) %s() *%s {", sch.Name, clsFuncName, nmClassName))
@@ -115,17 +116,17 @@ func (c *Config) Gen() *GenResType {
 	}
 }
 
-func ShowSchema(sch *schema.Schema) {
+func ShowSchemaMessage(sch *schema.Schema) {
 	fmt.Println("---")
-	fmt.Println("结构体名称", sch.Name)  //go结构体名称
-	fmt.Println("数据表名称", sch.Table) //数据库表名称
+	fmt.Println("schema_message", "结构体名称:", sch.Name, "数据表名称:", sch.Table, "模型字段: {") //go结构体名称 和 数据库表名称
 	for _, field := range sch.Fields {
-		fmt.Println(
+		fmt.Println("   ",
 			"Go字段名", field.Name, //go结构体成员名称
 			"Go类型", field.FieldType, //go的类型
 			"DB字段名", field.DBName, //数据表列名
 			"DB类型", field.DataType, //数据库的类型
 		)
 	}
+	fmt.Println("}")
 	fmt.Println("---")
 }
