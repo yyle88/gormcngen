@@ -25,6 +25,7 @@ func TestGenerate(t *testing.T) {
 		Example{},
 	}
 
-	cfg := gormcngen.NewConfigs(objects, true, absPath)
+	options := &gormcngen.Options{IsSubClassExportable: true}
+	cfg := gormcngen.NewConfigs(objects, options, absPath)
 	cfg.Gen() //将会把生成后的代码写到目标位置
 }

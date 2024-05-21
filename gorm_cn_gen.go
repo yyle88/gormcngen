@@ -19,10 +19,10 @@ type Configs struct {
 	writeClassPath       string
 }
 
-func NewConfigs(models []interface{}, isSubClassExportable bool, outputPath string) *Configs {
+func NewConfigs(models []interface{}, options *Options, outputPath string) *Configs {
 	cfgs := make([]*Config, 0, len(models))
 	for _, dest := range models {
-		cfgs = append(cfgs, NewConfigXObject(dest, isSubClassExportable))
+		cfgs = append(cfgs, NewConfigXObject(dest, options))
 	}
 	return NewConfigsFromConfigs(cfgs).SetFuncPath(outputPath).SetClassPath(outputPath)
 }

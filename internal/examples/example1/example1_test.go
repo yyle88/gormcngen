@@ -14,6 +14,7 @@ func TestGenerate(t *testing.T) {
 	t.Log(absPath)
 	require.True(t, utils.IsFileExist(absPath))
 
-	cfg := gormcngen.NewConfigs([]interface{}{&Person{}, &Example{}}, false, absPath)
+	options := &gormcngen.Options{IsSubClassExportable: false}
+	cfg := gormcngen.NewConfigs([]interface{}{&Person{}, &Example{}}, options, absPath)
 	cfg.Gen()
 }

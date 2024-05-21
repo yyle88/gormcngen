@@ -17,7 +17,8 @@ func TestGen(t *testing.T) {
 		UpdatedAt time.Time `gorm:"autoUpdateTime"`
 	}
 
-	cfg := NewConfigXObject(&Example{}, false)
+	options := &Options{}
+	cfg := NewConfigXObject(&Example{}, options)
 	res := cfg.Gen()
 	t.Log(res.clsFuncCode)
 	t.Log(res.nmClassCode)

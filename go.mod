@@ -7,10 +7,10 @@ require (
 	github.com/stretchr/testify v1.9.0
 	github.com/yyle88/done v1.0.0
 	github.com/yyle88/formatgo v1.0.0
-	github.com/yyle88/gormcnm v1.0.12
+	github.com/yyle88/gormcnm v1.0.13
 	github.com/yyle88/runpath v1.0.4
 	github.com/yyle88/slicesort v1.0.0
-	github.com/yyle88/syntaxgo v0.0.9
+	github.com/yyle88/syntaxgo v0.0.10
 	gorm.io/driver/sqlite v1.5.5
 	gorm.io/gorm v1.25.10
 )

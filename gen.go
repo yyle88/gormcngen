@@ -27,7 +27,11 @@ func NewConfig(sch *schema.Schema, nmClassName string, clsFuncName string) *Conf
 	}
 }
 
-func NewConfigXObject(dest interface{}, isSubClassExportable bool) *Config {
+type Options struct {
+	IsSubClassExportable bool //根据配置生成非导出的 exampleColumns 或者可导出的 ExampleColumns
+}
+
+func NewConfigXObject(dest interface{}, options *Options) *Config {
 	sch := done.VCE(schema.Parse(dest, &sync.Map{}, &schema.NamingStrategy{
 		SingularTable: false,
 		NoLowerCase:   false,
@@ -39,7 +43,7 @@ func NewConfigXObject(dest interface{}, isSubClassExportable bool) *Config {
 	const clsFuncName = "Columns"
 
 	var nmClassName string
-	if !isSubClassExportable {
+	if !options.IsSubClassExportable { //这里不判断options是否非空，默认就是非空（否则调用层写个nil也不太符合预期）
 		nmClassName = utils.CvtC0ToLowerString(sch.Name) + classSuffix
 	} else {
 		nmClassName = sch.Name + classSuffix //这里不用管，通常定义的结构体名称是导出的
