@@ -10,6 +10,7 @@ import (
 	"github.com/yyle88/done"
 	"github.com/yyle88/gormcngen/internal/utils"
 	"github.com/yyle88/gormcnm"
+	"github.com/yyle88/zaplog"
 	"gorm.io/gorm/schema"
 )
 
@@ -28,7 +29,7 @@ func NewConfig(sch *schema.Schema, nmClassName string, clsFuncName string) *Conf
 }
 
 type Options struct {
-	IsSubClassExportable bool //根据配置生成非导出的 exampleColumns 或者可导出的 ExampleColumns
+	IsSubClassExportable bool //根据配置生成非导出的 exampleColumns 或者可导出的 ExampleColumns，通常非导出已经是够用的
 }
 
 func NewConfigXObject(dest interface{}, options *Options) *Config {
@@ -105,13 +106,13 @@ func (c *Config) Gen() *GenResType {
 	clsFuncCode := strings.TrimSpace(pfu.String())
 	nmClassCode := strings.TrimSpace(pst.String())
 
-	fmt.Println("---")
+	zaplog.LOG.Debug("---")
 	fmt.Println(clsFuncCode)
-	fmt.Println("---")
+	zaplog.LOG.Debug("---")
 	fmt.Println(nmClassCode)
-	fmt.Println("---")
+	zaplog.LOG.Debug("---")
 	fmt.Println(moreImports)
-	fmt.Println("---")
+	zaplog.LOG.Debug("---")
 
 	return &GenResType{
 		clsFuncCode: clsFuncCode,
