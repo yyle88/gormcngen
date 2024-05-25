@@ -10,6 +10,9 @@ import (
 	"github.com/yyle88/runpath/runtestpath"
 )
 
+// 这句能让你的代码配合 go generate ./... 执行，假如不需要可以删除这句注释
+//
+//go:generate go test -v -run TestGenerate
 func TestGenerate(t *testing.T) {
 	absPath := runtestpath.SrcPath(t) //根据当前测试文件的路径找到其对应的源文件路径
 	t.Log(absPath)

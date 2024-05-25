@@ -16,10 +16,10 @@
 
 这是调用逻辑: [运行业务逻辑main](/internal/demos/demo1/main/main.go)
 
-因此最简单的使用的方法就是，直接拷贝 `gormcnm.gen_test.go` 这个文件到你的项目 model/models 目录里，接着把你想要生成的 model 的类对象写上就行。
-当然根据情况你需要略微改改测试代码，以及提前创建 `gormcnm.gen.go` 这个空的go文件。
+因此最简单的使用的方法就是，直接拷贝 [模型目录](/internal/demos/demo1/models) 里面的 `gormcnm.gen_test.go` 这个文件到你的项目 model/models 目录里，接着把你想要生成的 model 的类对象写上就行。
+当然根据情况你需要略微改改测试代码（比如修改包名 models 改为你的模型包名），接着运行这个测试文件即可得到新代码。
+出于安全考虑，在运行测试时为防止写错文件，代码中限制必须找到 `gormcnm.gen_test.go` 测试文件对应的源文件 `gormcnm.gen.go` 以后才能往里面写新代码，因此根据需要可以手动创建这个新代码文件。
 接着运行测试就行（前提是需要安装那些依赖）。
-
 ```
 go get github.com/yyle88/gormcngen
 ```
