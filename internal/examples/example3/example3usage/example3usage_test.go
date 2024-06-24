@@ -47,14 +47,14 @@ func TestSelect(t *testing.T) {
 	var one example3.Example
 	c := one.Columns()
 	require.NoError(t, caseDB.Where(c.Name.Eq("abc")).
-		Where(c.Order.Safe().Eq("a")).
-		Where(c.Desc.Safe().Eq("b")).
-		Where(c.Asc.Safe().Eq("c")).
-		Where(c.Type.Safe().Eq("d")).
-		Where(c.Create.Safe().Eq("e")).
-		Where(c.Select.Safe().Eq("f")).
-		Where(c.Update.Safe().Eq("g")).
-		Where(c.Delete.Safe().Eq("h")).
+		Where(c.Order.SafeCnm("``").Eq("a")).
+		Where(c.Desc.SafeCnm("``").Eq("b")).
+		Where(c.Asc.SafeCnm("``").Eq("c")).
+		Where(c.Type.SafeCnm("``").Eq("d")).
+		Where(c.Create.SafeCnm("``").Eq("e")).
+		Where(c.Select.SafeCnm("``").Eq("f")).
+		Where(c.Update.SafeCnm("``").Eq("g")).
+		Where(c.Delete.SafeCnm("``").Eq("h")).
 		First(&one).Error)
 	require.Equal(t, "abc", one.Name)
 	t.Log(utils.SoftNeatString(one))
