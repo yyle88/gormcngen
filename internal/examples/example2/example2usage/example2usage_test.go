@@ -1,4 +1,4 @@
-package models2case
+package example2usage
 
 import (
 	"testing"
@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/yyle88/done"
-	"github.com/yyle88/gormcngen/internal/examples/example1"
+	"github.com/yyle88/gormcngen/internal/examples/example2"
 	"github.com/yyle88/gormcngen/internal/utils"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -23,8 +23,8 @@ func TestMain(m *testing.M) {
 		done.Done(done.VCE(db.DB()).Nice().Close())
 	}()
 
-	done.Done(db.AutoMigrate(&example1.Person{}))
-	done.Done(db.Save(&example1.Person{
+	done.Done(db.AutoMigrate(&example2.Person{}))
+	done.Done(db.Save(&example2.Person{
 		ID:        0,
 		Name:      "abc",
 		BirthDate: "1970-01-01",
@@ -32,7 +32,7 @@ func TestMain(m *testing.M) {
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}).Error)
-	done.Done(db.Save(&example1.Person{
+	done.Done(db.Save(&example2.Person{
 		ID:        0,
 		Name:      "aaa",
 		BirthDate: "2023-12-28",
@@ -46,7 +46,7 @@ func TestMain(m *testing.M) {
 }
 
 func TestSelect(t *testing.T) {
-	var one example1.Person
+	var one example2.Person
 	c := one.Columns()
 	require.NoError(t, caseDB.Where(c.Name.Eq("abc")).Where(c.Gender.IsFALSE()).First(&one).Error)
 	require.Equal(t, "abc", one.Name)
@@ -54,8 +54,8 @@ func TestSelect(t *testing.T) {
 }
 
 func TestSelect_2(t *testing.T) {
-	var res []*example1.Person
-	c := (&example1.Person{}).Columns()
+	var res []*example2.Person
+	c := (&example2.Person{}).Columns()
 	require.NoError(t, caseDB.Where(c.Name.Qx("=?", "abc").
 		OR(
 			c.Name.Qx("=?", "aaa"),
@@ -70,7 +70,7 @@ func TestSelect_2(t *testing.T) {
 }
 
 func TestSelect_3(t *testing.T) {
-	var one example1.Person
+	var one example2.Person
 	c := one.Columns()
 
 	qsx := c.Name.Qx("= ?", "abc").
@@ -85,7 +85,7 @@ func TestSelect_3(t *testing.T) {
 }
 
 func TestSelect_4(t *testing.T) {
-	var one example1.Person
+	var one example2.Person
 	c := one.Columns()
 
 	qsx := c.Qx(
