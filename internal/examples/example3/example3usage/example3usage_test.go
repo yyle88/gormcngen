@@ -27,10 +27,6 @@ func TestMain(m *testing.M) {
 	done.Done(db.Save(&example3.Example{
 		ID:        0,
 		Name:      "abc",
-		Order:     "a",
-		Desc:      "b",
-		Asc:       "c",
-		Type:      "d",
 		Create:    "e",
 		Select:    "f",
 		Update:    "g",
@@ -47,10 +43,6 @@ func TestSelect(t *testing.T) {
 	var one example3.Example
 	c := one.Columns()
 	require.NoError(t, caseDB.Where(c.Name.Eq("abc")).
-		Where(c.Order.SafeCnm("``").Eq("a")).
-		Where(c.Desc.SafeCnm("``").Eq("b")).
-		Where(c.Asc.SafeCnm("``").Eq("c")).
-		Where(c.Type.SafeCnm("``").Eq("d")).
 		Where(c.Create.SafeCnm("``").Eq("e")).
 		Where(c.Select.SafeCnm("``").Eq("f")).
 		Where(c.Update.SafeCnm("``").Eq("g")).

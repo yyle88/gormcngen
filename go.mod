@@ -6,11 +6,11 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.9.0
 	github.com/yyle88/done v1.0.5
-	github.com/yyle88/formatgo v1.0.0
-	github.com/yyle88/gormcnm v1.0.21
+	github.com/yyle88/formatgo v1.0.1
+	github.com/yyle88/gormcnm v1.0.22
 	github.com/yyle88/runpath v1.0.4
 	github.com/yyle88/slicesort v1.0.1
-	github.com/yyle88/syntaxgo v0.0.10
+	github.com/yyle88/syntaxgo v0.0.12
 	github.com/yyle88/zaplog v0.0.7
 	gorm.io/driver/sqlite v1.5.6
 	gorm.io/gorm v1.25.10

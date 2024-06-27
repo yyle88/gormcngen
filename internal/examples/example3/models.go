@@ -7,10 +7,6 @@ import (
 type Example struct {
 	ID        int32     `gorm:"column:id;primaryKey;autoIncrement:true" json:"id"`
 	Name      string    `gorm:"not null,type:text"`
-	Order     string    `gorm:"not null,type:text"` // 测测列名是关键字的情况
-	Desc      string    `gorm:"not null,type:text"` // 测测列名是关键字的情况
-	Asc       string    `gorm:"not null,type:text"` // 测测列名是关键字的情况
-	Type      string    `gorm:"not null,type:text"`
 	Create    string    `gorm:"not null,type:text"` // 测测列名是关键字的情况
 	Select    string    `gorm:"not null,type:text"` // 测测列名是关键字的情况
 	Update    string    `gorm:"not null,type:text"` // 测测列名是关键字的情况
