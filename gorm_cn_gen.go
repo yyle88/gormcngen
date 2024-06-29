@@ -9,7 +9,7 @@ import (
 	"github.com/yyle88/formatgo"
 	"github.com/yyle88/gormcngen/internal/utils"
 	"github.com/yyle88/gormcnm"
-	"github.com/yyle88/slicesort"
+	"github.com/yyle88/sortslice"
 	"github.com/yyle88/syntaxgo/syntaxgo_ast"
 )
 
@@ -108,7 +108,7 @@ func (cs *Configs) Gen() {
 		}
 	}
 	//其实不同文件中的操作，合在一起排序，有一些取巧的成分，但认为这样做比较简单，因此没有严格区分文件，而是先排序再分文件的
-	slicesort.SortVStable[*elemType](elems, func(a, b *elemType) bool {
+	sortslice.SortVStable[*elemType](elems, func(a, b *elemType) bool {
 		if a.exist != b.exist {
 			return a.exist //认为已存在的要放在前面，而不存在的要放在后面，毕竟都是可以随便补充的
 		} else {
