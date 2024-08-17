@@ -45,7 +45,7 @@ func NewConfigXObject(dest interface{}, options *Options) *Config {
 
 	var nmClassName string
 	if !options.IsSubClassExportable { //这里不判断options是否非空，默认就是非空（否则调用层写个nil也不太符合预期）
-		nmClassName = utils.CvtC0ToLowerString(sch.Name) + classSuffix
+		nmClassName = utils.C0ToLOWER(sch.Name) + classSuffix
 	} else {
 		nmClassName = sch.Name + classSuffix //这里不用管，通常定义的结构体名称是导出的
 	}

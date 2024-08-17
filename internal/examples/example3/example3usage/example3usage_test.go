@@ -49,5 +49,5 @@ func TestSelect(t *testing.T) {
 		Where(c.Delete.SafeCnm("``").Eq("h")).
 		First(&one).Error)
 	require.Equal(t, "abc", one.Name)
-	t.Log(utils.SoftNeatString(one))
+	t.Log(utils.Neat(one))
 }

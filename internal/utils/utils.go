@@ -8,7 +8,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func SoftNeatString(v interface{}) string {
+func Neat(v interface{}) string {
 	data, err := NeatBytes(v)
 	if err != nil {
 		return "" //when the result is empty string, means wrong
@@ -40,7 +40,7 @@ func GetMapKeys[K comparable, V any](m map[K]V) (ks []K) {
 	return ks //返回默认值比如0或者空字符串等
 }
 
-func CvtC0ToLowerString(s string) string {
+func C0ToLOWER(s string) string {
 	runes := []rune(s)
 	if len(runes) > 0 {
 		runes[0] = unicode.ToLower(runes[0])
