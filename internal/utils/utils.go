@@ -1,28 +1,9 @@
 package utils
 
 import (
-	"encoding/json"
 	"os"
 	"unicode"
-
-	"github.com/pkg/errors"
 )
-
-func Neat(v interface{}) string {
-	data, err := NeatBytes(v)
-	if err != nil {
-		return "" //when the result is empty string, means wrong
-	}
-	return string(data)
-}
-
-func NeatBytes(v interface{}) ([]byte, error) {
-	data, err := json.MarshalIndent(v, "", "\t")
-	if err != nil {
-		return nil, errors.WithMessage(err, "marshal object is wrong")
-	}
-	return data, nil
-}
 
 func WriteFile(path string, data []byte) error {
 	return os.WriteFile(path, data, 0644)

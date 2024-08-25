@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/yyle88/done"
 	"github.com/yyle88/gormcngen/internal/examples/example2"
-	"github.com/yyle88/gormcngen/internal/utils"
+	"github.com/yyle88/neatjson/neatjsons"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -50,7 +50,7 @@ func TestSelect(t *testing.T) {
 	c := one.Columns()
 	require.NoError(t, caseDB.Where(c.Name.Eq("abc")).Where(c.Gender.IsFALSE()).First(&one).Error)
 	require.Equal(t, "abc", one.Name)
-	t.Log(utils.Neat(one))
+	t.Log(neatjsons.S(one))
 }
 
 func TestSelect_2(t *testing.T) {
@@ -66,7 +66,7 @@ func TestSelect_2(t *testing.T) {
 		).Qx4()).Where(c.Gender.IsFALSE()).Find(&res).Error)
 	require.Contains(t, []string{"abc", "aaa"}, res[0].Name)
 	require.Contains(t, []string{"abc", "aaa"}, res[1].Name)
-	t.Log(utils.Neat(res))
+	t.Log(neatjsons.S(res))
 }
 
 func TestSelect_3(t *testing.T) {
@@ -81,7 +81,7 @@ func TestSelect_3(t *testing.T) {
 
 	require.NoError(t, caseDB.Where(qsx.Qx2()).First(&one).Error)
 	require.Equal(t, "abc", one.Name)
-	t.Log(utils.Neat(one))
+	t.Log(neatjsons.S(one))
 }
 
 func TestSelect_4(t *testing.T) {
@@ -97,5 +97,5 @@ func TestSelect_4(t *testing.T) {
 
 	require.NoError(t, caseDB.Where(qsx.Qx2()).First(&one).Error)
 	require.Equal(t, "abc", one.Name)
-	t.Log(utils.Neat(one))
+	t.Log(neatjsons.S(one))
 }

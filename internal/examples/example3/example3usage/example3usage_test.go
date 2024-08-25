@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/yyle88/done"
 	"github.com/yyle88/gormcngen/internal/examples/example3"
-	"github.com/yyle88/gormcngen/internal/utils"
+	"github.com/yyle88/neatjson/neatjsons"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -49,5 +49,5 @@ func TestSelect(t *testing.T) {
 		Where(c.Delete.SafeCnm("``").Eq("h")).
 		First(&one).Error)
 	require.Equal(t, "abc", one.Name)
-	t.Log(utils.Neat(one))
+	t.Log(neatjsons.S(one))
 }
