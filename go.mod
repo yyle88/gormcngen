@@ -6,6 +6,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.9.0
 	github.com/yyle88/done v1.0.10
+	github.com/yyle88/erero v1.0.11
 	github.com/yyle88/formatgo v1.0.11
 	github.com/yyle88/gormcnm v1.0.34
 	github.com/yyle88/neatjson v0.0.7
@@ -24,7 +25,6 @@ require (
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/mattn/go-sqlite3 v1.14.23 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
-	github.com/yyle88/erero v1.0.11 // indirect
 	github.com/yyle88/must v0.0.3 // indirect
 	github.com/yyle88/mutexmap v1.0.4 // indirect
 	github.com/yyle88/sure v0.0.23 // indirect
