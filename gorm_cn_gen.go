@@ -22,13 +22,13 @@ type Configs struct {
 func NewConfigs(models []interface{}, options *Options, outputPath string) *Configs {
 	cfgs := make([]*Config, 0, len(models))
 	for _, dest := range models {
-		cfgs = append(cfgs, NewConfigXObject(dest, options))
+		cfgs = append(cfgs, NewConfig(dest, options))
 	}
-	return NewConfigsFromConfigs(cfgs).SetFuncPath(outputPath).SetClassPath(outputPath)
+	return GenConfigs(cfgs).SetFuncPath(outputPath).SetClassPath(outputPath)
 }
 
-// NewConfigsFromConfigs 假如用户不想用默认的schema风格时，或者想单独设置路径时，也可以使用自定义的
-func NewConfigsFromConfigs(cfgs []*Config) *Configs {
+// GenConfigs 假如用户不想用默认的schema风格时，或者想单独设置路径时，也可以使用自定义的
+func GenConfigs(cfgs []*Config) *Configs {
 	return &Configs{
 		configs:              cfgs,
 		writeColumnsFuncPath: "", //暂不设置，这样能够简化参数

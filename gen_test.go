@@ -18,7 +18,7 @@ func TestGen(t *testing.T) {
 	}
 
 	options := &Options{}
-	cfg := NewConfigXObject(&Example{}, options)
+	cfg := NewConfig(&Example{}, options)
 	res := cfg.Gen()
 	t.Log(res.clsFuncCode)
 	t.Log(res.nmClassCode)

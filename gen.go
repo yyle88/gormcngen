@@ -20,7 +20,7 @@ type Config struct {
 	clsFuncName string
 }
 
-func NewConfig(sch *schema.Schema, nmClassName string, clsFuncName string) *Config {
+func GenConfig(sch *schema.Schema, nmClassName string, clsFuncName string) *Config {
 	return &Config{
 		sch:         sch,
 		clsFuncName: clsFuncName,
@@ -32,7 +32,7 @@ type Options struct {
 	IsSubClassExportable bool //根据配置生成非导出的 exampleColumns 或者可导出的 ExampleColumns，通常非导出已经是够用的
 }
 
-func NewConfigXObject(dest interface{}, options *Options) *Config {
+func NewConfig(dest interface{}, options *Options) *Config {
 	sch := done.VCE(schema.Parse(dest, &sync.Map{}, &schema.NamingStrategy{
 		SingularTable: false,
 		NoLowerCase:   false,
@@ -50,7 +50,7 @@ func NewConfigXObject(dest interface{}, options *Options) *Config {
 		nmClassName = sch.Name + classSuffix //这里不用管，通常定义的结构体名称是导出的
 	}
 
-	return NewConfig(sch, nmClassName, clsFuncName)
+	return GenConfig(sch, nmClassName, clsFuncName)
 }
 
 type GenResType struct {
