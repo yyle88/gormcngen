@@ -82,20 +82,21 @@ func TestSelect_x2x(t *testing.T) {
 func TestSelect_x3x(t *testing.T) {
 	var one example4.Student
 	c := one.Columns()
-	require.ErrorIs(t, caseDB.Where(c.V名字.Eq("古天乐")).Where(c.V性别.Eq(example4.Female)).First(&one).Error, gorm.ErrRecordNotFound)
+	err := caseDB.Where(c.V名字.Eq("古天乐")).Where(c.V性别.Eq(example4.Female)).First(&one).Error
+	require.ErrorIs(t, err, gorm.ErrRecordNotFound)
 }
 
 func TestSelect_x4x(t *testing.T) {
-	var one example4.Class
-	if c := one.Columns(); c.OK() {
-		require.NoError(t, caseDB.Where(c.V班级编码.Eq("LOVE")).First(&one).Error)
-		t.Log(neatjsons.S(one))
+	var classLove example4.Class
+	if c := classLove.Columns(); c.OK() {
+		require.NoError(t, caseDB.Where(c.V班级编码.Eq("LOVE")).First(&classLove).Error)
 	}
+	t.Log(neatjsons.S(classLove))
 
 	var students []*example4.Student
 	if c := new(example4.Student).Columns(); c.OK() {
-		require.NoError(t, caseDB.Where(c.V班级编码.Eq(one.V班级编码)).Find(&students).Error)
+		require.NoError(t, caseDB.Where(c.V班级编码.Eq(classLove.V班级编码)).Find(&students).Error)
+		require.Len(t, students, 2)
 	}
-	require.Len(t, students, 2)
 	t.Log(neatjsons.S(students))
 }
