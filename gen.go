@@ -35,6 +35,7 @@ type Options struct {
 	IsSubClassExportable bool   // 根据配置生成非导出的 exampleColumns 或者可导出的 ExampleColumns，通常非导出已经是够用的
 	UseTagName           bool   // 是否使用标签中的字符串作为字段名
 	TagKeyName           string // 标签的键名，存储字段名，自定义的配置
+	SkipNotTag           bool   // 跳过没打标签的，这样能避免模型字段特别多的情况
 }
 
 func NewConfig(dest interface{}, options *Options) *Config {
@@ -101,7 +102,10 @@ func (c *Config) Gen() *GenResType {
 			}
 			typName = field.FieldType.String() //得用完整的名字
 		}
-		cnmNewFieldName := c.getCnmClassNewFieldName(field)
+		cnmNewFieldName, ok := c.getCnmClassNewFieldName(field)
+		if !ok {
+			continue //有的场景不需要获得列名，比如某个列不太关键
+		}
 
 		pst.Println(align, cnmNewFieldName, fmt.Sprintf("%s.ColumnName[%s]", pkgName, typName))
 
@@ -130,8 +134,7 @@ func (c *Config) Gen() *GenResType {
 	}
 }
 
-func (c *Config) getCnmClassNewFieldName(field *schema.Field) string {
-	fieldName := field.Name
+func (c *Config) getCnmClassNewFieldName(field *schema.Field) (string, bool) {
 	if c.options.UseTagName {
 		var tagKeyName = utils.VOrX(c.options.TagKeyName, "cnm")
 
@@ -140,10 +143,15 @@ func (c *Config) getCnmClassNewFieldName(field *schema.Field) string {
 			if !utils.IsExportable(name) { //根据经验而谈这里应该配置为导出的
 				panic(erero.Errorf("name=%v is not exportable", name))
 			}
-			fieldName = name
+			return name, true
+		} else {
+			if c.options.SkipNotTag {
+				return "", false
+			}
+			return field.Name, true
 		}
 	}
-	return fieldName
+	return field.Name, true
 }
 
 func ShowSchemaMessage(sch *schema.Schema) {
