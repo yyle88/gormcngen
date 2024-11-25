@@ -11,6 +11,7 @@ import (
 	"github.com/yyle88/erero"
 	"github.com/yyle88/gormcngen/internal/utils"
 	"github.com/yyle88/gormcnm"
+	"github.com/yyle88/tern/zerotern"
 	"github.com/yyle88/zaplog"
 	"gorm.io/gorm/schema"
 )
@@ -136,7 +137,7 @@ func (c *Config) Gen() *GenResType {
 
 func (c *Config) getCnmClassNewFieldName(field *schema.Field) (string, bool) {
 	if c.options.UseTagName {
-		var tagKeyName = utils.VOrX(c.options.TagKeyName, "cnm")
+		var tagKeyName = zerotern.VV(c.options.TagKeyName, "cnm")
 
 		name, ok := field.Tag.Lookup(tagKeyName)
 		if ok {

@@ -27,12 +27,3 @@ func ToExportable(s string) string {
 func IsExportable(fieldName string) bool {
 	return unicode.IsUpper(([]rune(fieldName))[0])
 }
-
-func VOrX[T comparable](v T, x T) T {
-	var zero T
-	if v != zero {
-		return v
-	} else {
-		return x
-	}
-}
