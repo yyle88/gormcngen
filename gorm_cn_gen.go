@@ -9,8 +9,10 @@ import (
 	"github.com/yyle88/formatgo"
 	"github.com/yyle88/gormcngen/internal/utils"
 	"github.com/yyle88/gormcnm"
+	"github.com/yyle88/rese"
 	"github.com/yyle88/sortslice"
 	"github.com/yyle88/syntaxgo/syntaxgo_ast"
+	"github.com/yyle88/syntaxgo/syntaxgo_astnode"
 )
 
 type Configs struct {
@@ -60,8 +62,8 @@ func (cs *Configs) Gen() {
 	for idx, cfg := range cs.configs {
 		res := cfg.Gen()
 		if path := cs.writeColumnsFuncPath; path != "" {
-			astFile, err := syntaxgo_ast.NewAstXFilepath(path)
-			done.Done(err)
+			astBundle := rese.P1(syntaxgo_ast.NewAstBundleV4(path))
+			astFile, _ := astBundle.GetBundle()
 
 			astFunc, ok := syntaxgo_ast.SeekFuncXRecvNameXFuncName(astFile, cfg.sch.Name, cfg.clsFuncName)
 			if ok {
@@ -75,7 +77,7 @@ func (cs *Configs) Gen() {
 			} else {
 				elems = append(elems, &elemType{
 					srcPath:     path,
-					astNode:     syntaxgo_ast.NewNode(token.Pos(100*idx)+1, 0), //给个假的，做排序用
+					astNode:     syntaxgo_astnode.NewNode(token.Pos(100*idx)+1, 0), //给个假的，做排序用
 					exist:       false,
 					newSrcBlock: res.clsFuncCode,
 					moreImports: res.moreImports,
@@ -83,8 +85,9 @@ func (cs *Configs) Gen() {
 			}
 		}
 		if path := cs.writeClassPath; path != "" {
-			astFile, err := syntaxgo_ast.NewAstXFilepath(path)
-			done.Done(err)
+			astBundle := rese.P1(syntaxgo_ast.NewAstBundleV4(path))
+
+			astFile, _ := astBundle.GetBundle()
 
 			structDeclsTypes := syntaxgo_ast.SeekMapStructNameDeclsTypes(astFile)
 			structType, ok := structDeclsTypes[cfg.nmClassName]
@@ -99,7 +102,7 @@ func (cs *Configs) Gen() {
 			} else {
 				elems = append(elems, &elemType{
 					srcPath:     path,
-					astNode:     syntaxgo_ast.NewNode(token.Pos(100*idx)+2, 0), //给个假的，做排序用
+					astNode:     syntaxgo_astnode.NewNode(token.Pos(100*idx)+2, 0), //给个假的，做排序用
 					exist:       false,
 					newSrcBlock: res.nmClassCode,
 					moreImports: res.moreImports,
@@ -138,7 +141,7 @@ func (cs *Configs) Gen() {
 	for _, elem := range elems {
 		srcNode := srcMap[elem.srcPath]
 		if elem.exist { //假如存在就替换它，替换代码块的全部内容
-			srcNode.source = syntaxgo_ast.ChangeNodeBytesXNewLines(srcNode.source, elem.astNode, []byte(elem.newSrcBlock), 2)
+			srcNode.source = syntaxgo_astnode.ChangeNodeCodeSetSomeNewLines(srcNode.source, elem.astNode, []byte(elem.newSrcBlock), 2)
 		} else { //假如不存在就追加它，把内容追加到文件末尾
 			srcNode.source = append(srcNode.source, byte('\n'), byte('\n'))
 			codeBlockBytes := []byte(elem.newSrcBlock)
@@ -150,14 +153,13 @@ func (cs *Configs) Gen() {
 	}
 
 	for absPath, srcNode := range srcMap {
-		source := syntaxgo_ast.AddImports(
-			srcNode.source,
-			&syntaxgo_ast.PackageImportOptions{
-				Packages:   utils.GetMapKeys(srcNode.moreImports),
-				UsingTypes: nil,
-				Objects:    []any{gormcnm.ColumnOperationClass{}},
-			},
-		)
+		option := &syntaxgo_ast.PackageImportOptions{
+			Packages:   utils.GetMapKeys(srcNode.moreImports),
+			UsingTypes: nil,
+			Objects:    []any{gormcnm.ColumnOperationClass{}},
+		}
+		source := option.InjectImports(srcNode.source)
+
 		newSource := done.VAE(formatgo.FormatBytes(source)).Nice()
 		done.Done(utils.WriteFile(absPath, newSource))
 	}
