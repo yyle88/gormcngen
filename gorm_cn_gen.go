@@ -13,6 +13,7 @@ import (
 	"github.com/yyle88/sortslice"
 	"github.com/yyle88/syntaxgo/syntaxgo_ast"
 	"github.com/yyle88/syntaxgo/syntaxgo_astnode"
+	"github.com/yyle88/syntaxgo/syntaxgo_search"
 )
 
 type Configs struct {
@@ -65,7 +66,7 @@ func (cs *Configs) Gen() {
 			astBundle := rese.P1(syntaxgo_ast.NewAstBundleV4(path))
 			astFile, _ := astBundle.GetBundle()
 
-			astFunc, ok := syntaxgo_ast.SeekFuncXRecvNameXFuncName(astFile, cfg.sch.Name, cfg.clsFuncName)
+			astFunc, ok := syntaxgo_search.FindFunctionByReceiverAndName(astFile, cfg.sch.Name, cfg.clsFuncName)
 			if ok {
 				elems = append(elems, &elemType{
 					srcPath:     path,
@@ -89,7 +90,7 @@ func (cs *Configs) Gen() {
 
 			astFile, _ := astBundle.GetBundle()
 
-			structDeclsTypes := syntaxgo_ast.SeekMapStructNameDeclsTypes(astFile)
+			structDeclsTypes := syntaxgo_search.MapStructTypeDeclarationsByName(astFile)
 			structType, ok := structDeclsTypes[cfg.nmClassName]
 			if ok {
 				elems = append(elems, &elemType{
@@ -154,9 +155,9 @@ func (cs *Configs) Gen() {
 
 	for absPath, srcNode := range srcMap {
 		option := &syntaxgo_ast.PackageImportOptions{
-			Packages:   utils.GetMapKeys(srcNode.moreImports),
-			UsingTypes: nil,
-			Objects:    []any{gormcnm.ColumnOperationClass{}},
+			Packages:        utils.GetMapKeys(srcNode.moreImports),
+			ReferencedTypes: nil,
+			InferredObjects: []any{gormcnm.ColumnOperationClass{}},
 		}
 		source := option.InjectImports(srcNode.source)
 
