@@ -8,7 +8,8 @@ require (
 	github.com/yyle88/done v1.0.18
 	github.com/yyle88/erero v1.0.14
 	github.com/yyle88/formatgo v1.0.19
-	github.com/yyle88/gormcnm v1.0.42
+	github.com/yyle88/gormcnm v1.0.43
+	github.com/yyle88/must v0.0.9
 	github.com/yyle88/neatjson v0.0.10
 	github.com/yyle88/osexistpath v0.0.13
 	github.com/yyle88/printgo v1.0.1
@@ -28,7 +29,6 @@ require (
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/mattn/go-sqlite3 v1.14.24 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
-	github.com/yyle88/must v0.0.9 // indirect
 	github.com/yyle88/mutexmap v1.0.8 // indirect
 	github.com/yyle88/sure v0.0.32 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
