@@ -1,4 +1,4 @@
-package models
+package demo2models
 
 import (
 	"testing"
@@ -20,10 +20,10 @@ func TestGenerate(t *testing.T) {
 	require.True(t, osmustexist.IsFile(absPath))
 
 	//在这里写下你要生成的 models 的对象列表，指针类型或非指针类型都是可以的，选中生成模型
-	objects := []any{&Example{}}
+	objects := []any{&User{}, &Order{}}
 
 	options := &gormcngen.Options{
-		IsSubClassExportable: true, //中间类型名称的样式为可导出的 ExampleColumns
+		ExportGeneratedStruct: true, //中间类型名称的样式为可导出的 ExampleColumns
 	}
 	cfg := gormcngen.NewConfigs(objects, options, absPath)
 	cfg.Gen() //将会把生成后的代码写到目标位置，即 "gormcnm.gen.go" 这个文件里

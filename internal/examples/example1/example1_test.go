@@ -12,7 +12,7 @@ func TestGenerate(t *testing.T) {
 	absPath := osmustexist.FILE(runtestpath.SrcPath(t))
 	t.Log(absPath)
 
-	options := &gormcngen.Options{IsSubClassExportable: false}
+	options := &gormcngen.Options{ExportGeneratedStruct: false}
 	cfg := gormcngen.NewConfigs([]interface{}{&Person{}, &Example{}}, options, absPath)
 	cfg.Gen()
 }

@@ -1,4 +1,4 @@
-package models
+package demo1models
 
 // Example is a gorm model define 3 fields(name, type, rank)
 type Example struct {

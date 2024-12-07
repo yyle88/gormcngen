@@ -13,8 +13,8 @@ func TestGenerate(t *testing.T) {
 	t.Log(absPath)
 
 	options := &gormcngen.Options{
-		IsSubClassExportable: true,
-		UseTagName:           true,
+		ExportGeneratedStruct: true,
+		UseTagName:            true,
 	}
 	cfg := gormcngen.NewConfigs([]interface{}{
 		&Student{},

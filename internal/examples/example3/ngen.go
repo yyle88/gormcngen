@@ -20,8 +20,9 @@ func (*Example) Columns() *ExampleColumns {
 }
 
 type ExampleColumns struct {
-	gormcnm.ColumnOperationClass //继承操作函数，让查询更便捷
-	// 模型各个列名和类型:
+	// Embedding operation functions make it easy to use // 继承操作函数便于使用
+	gormcnm.ColumnOperationClass
+	// The column names and types of the model's columns // 模型各列的列名和类型
 	ID        gormcnm.ColumnName[int32]
 	Name      gormcnm.ColumnName[string]
 	Create    gormcnm.ColumnName[string]
