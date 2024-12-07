@@ -27,9 +27,10 @@ type UserColumns struct {
 }
 
 type Order struct {
-	ID     uint
-	UserID uint
-	Amount float64
+	ID          uint
+	UserID      uint
+	ProductName string
+	Amount      float64
 }
 
 func (*Order) TableName() string {
@@ -38,9 +39,10 @@ func (*Order) TableName() string {
 
 func (*Order) Columns() *OrderColumns {
 	return &OrderColumns{
-		ID:     "id",
-		UserID: "user_id",
-		Amount: "amount",
+		ID:          "id",
+		UserID:      "user_id",
+		ProductName: "product_name",
+		Amount:      "amount",
 	}
 }
 
@@ -48,7 +50,8 @@ type OrderColumns struct {
 	// Embedding operation functions make it easy to use // 继承操作函数便于使用
 	gormcnm.ColumnOperationClass
 	// The column names and types of the model's columns // 模型各列的列名和类型
-	ID     gormcnm.ColumnName[uint]
-	UserID gormcnm.ColumnName[uint]
-	Amount gormcnm.ColumnName[float64]
+	ID          gormcnm.ColumnName[uint]
+	UserID      gormcnm.ColumnName[uint]
+	ProductName gormcnm.ColumnName[string]
+	Amount      gormcnm.ColumnName[float64]
 }

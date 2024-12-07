@@ -1,45 +1,161 @@
-# gormcngen 目的是让gorm的硬编码减少些
+[![GitHub Workflow Status (branch)](https://img.shields.io/github/actions/workflow/status/yyle88/gormcngen/release.yml?branch=main&label=BUILD)](https://github.com/yyle88/gormcngen/actions/workflows/release.yml?query=branch%3Amain)
+[![GoDoc](https://pkg.go.dev/badge/github.com/yyle88/gormcngen)](https://pkg.go.dev/github.com/yyle88/gormcngen)
+[![Coverage Status](https://img.shields.io/coveralls/github/yyle88/gormcngen/master.svg)](https://coveralls.io/github/yyle88/gormcngen?branch=main)
+![Supported Go Versions](https://img.shields.io/badge/Go-1.22%2C%201.23-lightgrey.svg)
+[![GitHub Release](https://img.shields.io/github/release/yyle88/gormcngen.svg)](https://github.com/yyle88/gormcngen/releases)
+[![Go Report Card](https://goreportcard.com/badge/github.com/yyle88/gormcngen)](https://goreportcard.com/report/github.com/yyle88/gormcngen)
 
-你需要首先看这个项目 [gormcnm](https://github.com/yyle88/gormcnm)
+# `gormcngen`: Provides a Columns() Function to Retrieve Column Names for GORM Models
 
-假设你就是从那个项目过来的，已经深刻理解这个项目的作用，就是生成那个项目 [gormcnm](https://github.com/yyle88/gormcnm) 需要的列定义代码。
+Like `MyBatis Plus` in the Java ecosystem, which allows developers to dynamically retrieve column names using expressions like `Example::getName`.
 
-接下来告诉你如何使用。
+Like `SQLAlchemy` in the Python ecosystem, which allows developers to access column names using a `cls` function, like `Example.name`.
 
-其实内容都在: [这个demo目录里面](/internal/demos/demo1)
+`gormcngen` also brings **type-safe** column referencing to Go models.
 
-首先请看这里: [最简单的demo模型](/internal/demos/demo1/models/example.go) 
+## CHINESE README
 
-接着请看这里: [如何生成代码case](/internal/demos/demo1/models/gormcnm.gen_test.go)
+[中文说明](README.zh.md)
 
-生成的新代码: [得到中间代码code](/internal/demos/demo1/models/gormcnm.gen.go)
+## Installation
 
-这是调用逻辑: [运行业务逻辑main](/internal/demos/demo1/main/main.go)
-
-因此最简单的使用的方法就是，直接拷贝 [模型目录](/internal/demos/demo1/models) 里面的 `gormcnm.gen_test.go` 这个文件到你的项目 model/models 目录里，接着把你想要生成的 model 的类对象写上就行。
-当然根据情况你需要略微改改测试代码（比如修改包名 models 改为你的模型包名），接着运行这个测试文件即可得到新代码。
-出于安全考虑，在运行测试时为防止写错文件，代码中限制必须找到 `gormcnm.gen_test.go` 测试文件对应的源文件 `gormcnm.gen.go` 以后才能往里面写新代码，因此根据需要可以手动创建这个新代码文件。
-接着运行测试就行（前提是需要安装那些依赖）。
-```
+```bash
 go get github.com/yyle88/gormcngen
 ```
 
-## 样例
-还有这些样例: [其它样例的目录](internal/examples) 里面演示了多个model的时候如何做，和把代码生成在和model相同的文件里怎么做，但我事后看来这些好像无用功，因为连我自己都不想把代码生成到已经有内容的 model 定义文件里（觉得还是独立出来，随时清空再生成就行）。
+## Example Usage
 
-## 彩蛋
-在这个样例中还有中文编码。
+### 1. Define Your Model
 
-### 使用中文编码
-这个样例 [中文样例](internal/examples/example4/example4usage/example4usage_test.go) 使用中文编码，只是个简答的探索。其实我自己早已用起来了中文编码这部分，但是绝大多数人依然认为把英语学好很重要，但是人生苦短，早点把业务做出来然后暴富也是更好的选择。
+For example, let's say you have the following model:
 
-### 使用母语编码
-当然也可以使用其它国家的语言，使用母语非常重要，便于书写和理解，有利于加快开发进度。假如单个开发者使用英文写单个项目的极限代码量是5万行，则使用母语应该能再翻几倍，这样复杂的业务逻辑也就变得很轻松啦，特别适合在业余时间注意力不集中时开发，也很适合断断续续的抽空做。
+```go
+type Example struct {
+	Name string `gorm:"primary_key;type:varchar(100);"`
+	Type string `gorm:"column:type;"`
+	Rank int    `gorm:"column:rank;"`
+}
+```
 
-## 补充
-具体在使用 `gorm` 时如何配合使用，还是看原来的: [gormcnm](https://github.com/yyle88/gormcnm) 里面有较为详细的说明(其实不详细，毕竟只有1个开发者也没有官网，因此能不能用起来就只能靠悟啦，实在是不好意思啊)。
+### 2. Automatically Generate the `Columns()` Method
 
-## 其它
-单是把这个开源出来，能让我在以后的公司代码里使用，其收益就已经回本啦。
+Using `gormcngen`, it will automatically generate the `Columns()` method for your model:
 
-但我为什么不把 [gormcnm](https://github.com/yyle88/gormcnm) 和 [gormcngen](https://github.com/yyle88/gormcngen) 合为同一个项目呢，我想，这或许是因为最初做的时候就是分【工具包】和【生成包】俩包做的，最后开源出来也保留了这种印记。但也未必两个包必然是同时使用的。就这样吧。
+```go
+func (*Example) Columns() *ExampleColumns {
+	return &ExampleColumns{
+		Name: "name",
+		Type: "type",
+		Rank: "rank",
+	}
+}
+
+type ExampleColumns struct {
+	Name gormcnm.ColumnName[string]
+	Type gormcnm.ColumnName[string]
+	Rank gormcnm.ColumnName[int]
+}
+```
+
+### 3. Querying with the Generated `Columns()`
+
+Now you can easily use the generated `Columns()` method to build queries:
+
+```go
+var res Example
+var cls = res.Columns()
+
+if err := db.Where(cls.Name.Eq("abc")).
+    Where(cls.Type.Eq("xyz")).
+    Where(cls.Rank.Gt(100)).
+    Where(cls.Rank.Lt(200)).
+    First(&res).Error; err != nil {
+    panic(errors.WithMessage(err, "wrong"))
+}
+
+fmt.Println(res)
+```
+
+### 4. Example with Custom Column Names
+
+If your model contains custom column names (like using Chinese), it works similarly:
+
+```go
+type Demo struct {
+	gorm.Model
+	Name string `gorm:"type:varchar(100);" cnm:"V名称"`
+	Type string `gorm:"type:varchar(100);" cnm:"V类型"`
+}
+```
+
+Generated code:
+
+```go
+func (*Demo) Columns() *DemoColumns {
+	return &DemoColumns{
+		ID:        "id",
+		CreatedAt: "created_at",
+		UpdatedAt: "updated_at",
+		DeletedAt: "deleted_at",
+		V名称:      "name",
+		V类型:      "type",
+	}
+}
+
+type DemoColumns struct {
+	ID        gormcnm.ColumnName[uint]
+	CreatedAt gormcnm.ColumnName[time.Time]
+	UpdatedAt gormcnm.ColumnName[time.Time]
+	DeletedAt gormcnm.ColumnName[gorm.DeletedAt]
+	V名称      gormcnm.ColumnName[string]
+	V类型      gormcnm.ColumnName[string]
+}
+```
+
+With this, you can use your native language for column names when querying:
+
+```go
+var demo Demo
+var cls = demo.Columns()
+
+if err := db.Where(cls.V名称.Eq("测试")).
+    Where(cls.V类型.Eq("类型A")).
+    First(&demo).Error; err != nil {
+    panic(errors.WithMessage(err, "wrong"))
+}
+
+fmt.Println(demo)
+```
+
+---
+
+This is a more straightforward explanation of how to install and use `gormcngen` to generate the `Columns()` method for GORM models, allowing you to easily build queries with column names in any language.
+
+---
+
+## Design Ideas
+
+[README OLD DOC](internal/docs/README_OLD_DOC.en.md)
+
+---
+
+## License
+
+`gormcngen` is open-source and released under the MIT License. See the [LICENSE](LICENSE) file for more information.
+
+---
+
+## Support
+
+Welcome to contribute to this project by submitting pull requests or reporting issues.
+
+If you find this package helpful, give it a star on GitHub!
+
+**Thank you for your support!**
+
+**Happy Coding with `gormcngen`!** 🎉
+
+Give me stars. Thank you!!!
+
+## See stars
+[![see stars](https://starchart.cc/yyle88/gormcngen.svg?variant=adaptive)](https://starchart.cc/yyle88/gormcngen)

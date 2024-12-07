@@ -1,9 +1,10 @@
-package gormcngen
+package gormcngen_test
 
 import (
 	"testing"
 	"time"
 
+	"github.com/yyle88/gormcngen"
 	"github.com/yyle88/neatjson/neatjsons"
 )
 
@@ -19,11 +20,11 @@ func TestGen(t *testing.T) {
 		UpdatedAt time.Time `gorm:"autoUpdateTime"`
 	}
 
-	config := NewSchemaConfig(&Example{}, &Options{})
+	config := gormcngen.NewSchemaConfig(&Example{}, &gormcngen.Options{})
 	output := config.Gen()
-	t.Log(output.methodCode)
-	t.Log(output.structCode)
-	t.Log(neatjsons.S(output.pkgImports))
+	t.Log(output.GetMethodCode())
+	t.Log(output.GetStructCode())
+	t.Log(neatjsons.S(output.GetPkgImports()))
 }
 
 func TestGen_UseTagName(t *testing.T) {
@@ -34,13 +35,13 @@ func TestGen_UseTagName(t *testing.T) {
 		UpdatedAt time.Time `gorm:"autoUpdateTime"`
 	}
 
-	config := NewSchemaConfig(&Example{}, &Options{
+	config := gormcngen.NewSchemaConfig(&Example{}, &gormcngen.Options{
 		UseTagName: true,
 	})
 	output := config.Gen()
-	t.Log(output.methodCode)
-	t.Log(output.structCode)
-	t.Log(neatjsons.S(output.pkgImports))
+	t.Log(output.GetMethodCode())
+	t.Log(output.GetStructCode())
+	t.Log(neatjsons.S(output.GetPkgImports()))
 }
 
 func TestGen_ExcludeUntaggedFields(t *testing.T) {
@@ -51,12 +52,12 @@ func TestGen_ExcludeUntaggedFields(t *testing.T) {
 		UpdatedAt time.Time `gorm:"autoUpdateTime"`
 	}
 
-	config := NewSchemaConfig(&Example{}, &Options{
+	config := gormcngen.NewSchemaConfig(&Example{}, &gormcngen.Options{
 		UseTagName:            true,
 		ExcludeUntaggedFields: true,
 	})
 	output := config.Gen()
-	t.Log(output.methodCode)
-	t.Log(output.structCode)
-	t.Log(neatjsons.S(output.pkgImports))
+	t.Log(output.GetMethodCode())
+	t.Log(output.GetStructCode())
+	t.Log(neatjsons.S(output.GetPkgImports()))
 }

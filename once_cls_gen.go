@@ -82,6 +82,18 @@ type ColumnsMethodStructOutput struct {
 	pkgImports map[string]bool // Package imports required by the generated code.// 生成代码需要的包导入。
 }
 
+func (x *ColumnsMethodStructOutput) GetMethodCode() string {
+	return x.methodCode
+}
+
+func (x *ColumnsMethodStructOutput) GetStructCode() string {
+	return x.structCode
+}
+
+func (x *ColumnsMethodStructOutput) GetPkgImports() map[string]bool {
+	return x.pkgImports
+}
+
 // Generate Generates the column method and struct based on the configuration.
 // Generate 根据配置生成列方法和结构。
 func (c *Config) Generate() *ColumnsMethodStructOutput {
