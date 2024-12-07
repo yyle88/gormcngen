@@ -9,7 +9,7 @@
 
 Like `MyBatis Plus` in the Java ecosystem, which allows developers to dynamically retrieve column names using expressions like `Example::getName`.
 
-Like `SQLAlchemy` in the Python ecosystem, which allows developers to access column names using a `cls` function, like `Example.name`.
+Like `SQLAlchemy` in the Python ecosystem, which allows developers to access column names using a `class` function, like `Example.name`.
 
 `gormcngen` also brings **type-safe** column referencing to Go models.
 
@@ -132,6 +132,10 @@ fmt.Println(demo)
 This is a more straightforward explanation of how to install and use `gormcngen` to generate the `Columns()` method for GORM models, allowing you to easily build queries with column names in any language.
 
 ---
+
+## Demos
+
+[demos](internal/demos)
 
 ## Design Ideas
 

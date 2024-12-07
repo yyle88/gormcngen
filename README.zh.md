@@ -2,7 +2,7 @@
 
 就像 Java 生态系统中的 `MyBatis Plus`，它允许开发人员使用像 `Example::getName` 这样的表达式获取列名。
 
-就像 Python 生态系统中的 `SQLAlchemy`，它允许开发人员使用像 `Example.name` 这样的 cls 函数获得列名。
+就像 Python 生态系统中的 `SQLAlchemy`，它允许开发人员使用像 `Example.name` 这样的 class 函数获得列名。
 
 `gormcngen` 也为 Go 模型赋予 **类型安全** 的列引用功能。
 
@@ -125,6 +125,10 @@ fmt.Println(demo)
 通过使用 `gormcngen`，你可以轻松自动生成 `Columns()` 方法，进而用任何语言编写简单的查询语句。
 
 ---
+
+## 完整样例
+
+[完整样例](internal/demos)
 
 ## 设计思路
 
