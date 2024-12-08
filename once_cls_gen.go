@@ -12,6 +12,7 @@ import (
 	"github.com/yyle88/gormcngen/internal/utils"
 	"github.com/yyle88/gormcnm"
 	"github.com/yyle88/neatjson/neatjsons"
+	"github.com/yyle88/tern"
 	"github.com/yyle88/tern/zerotern"
 	"github.com/yyle88/zaplog"
 	"gorm.io/gorm/schema"
@@ -33,6 +34,8 @@ type Options struct {
 	UseTagName            bool   // Use tag names as field names if set.// 是否使用标签名作为字段名。
 	TagKeyName            string // Tag key to store field names.// 存储字段名的标签键。
 	ExcludeUntaggedFields bool   // Skip fields without tags.// 跳过没有标签的字段。
+	ColumnsMethodRecvName string // Columns method receiver name // (某某某 *T) Columns 函数的接受者字符串
+	ColumnsCheckFieldType bool   // Columns method check field type // (某某某 *T) Columns 是否检查字段类型
 }
 
 // NewSchemaConfig Creates a Config instance for the given destination model and options.
@@ -107,7 +110,7 @@ func (c *Config) Gen() *ColumnsMethodStructOutput {
 	structPtx.Println(fmt.Sprintf("type %s struct{", c.structName))
 
 	methodPtx := utils.NewPTX()
-	methodPtx.Println(fmt.Sprintf("func (*%s) %s() *%s {", c.sch.Name, c.methodName, c.structName))
+	methodPtx.Println(fmt.Sprintf("func (%s*%s) %s() *%s {", c.options.ColumnsMethodRecvName, c.sch.Name, c.methodName, c.structName))
 
 	operationClass := reflect.TypeOf(gormcnm.ColumnOperationClass{})
 	pkgNameGormCnm := filepath.Base(operationClass.PkgPath())
@@ -140,7 +143,13 @@ func (c *Config) Gen() *ColumnsMethodStructOutput {
 
 		structPtx.Println(indentPrefix, newStructFieldName, fmt.Sprintf("%s.ColumnName[%s]", pkgNameGormCnm, columnGoTypeName))
 
-		methodPtx.Println(indentPrefix, indentPrefix, fmt.Sprintf(`%s:"%s",`, newStructFieldName, field.DBName))
+		dbColumnName := tern.BFF(c.options.ColumnsMethodRecvName != "" && c.options.ColumnsCheckFieldType, func() string {
+			return fmt.Sprintf(`%s.Cnm(%s.%s, "%s")`, pkgNameGormCnm, c.options.ColumnsMethodRecvName, field.Name, field.DBName)
+		}, func() string {
+			return `"` + field.DBName + `"`
+		})
+
+		methodPtx.Println(indentPrefix, indentPrefix, fmt.Sprintf("%s:%s,", newStructFieldName, dbColumnName))
 	}
 	structPtx.Println("}")
 	methodPtx.Println("	}")

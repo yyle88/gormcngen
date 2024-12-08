@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/yyle88/done"
 	"github.com/yyle88/gormcngen/internal/demos/demo2/demo2models"
+	"github.com/yyle88/gormcnm"
 	"github.com/yyle88/must"
 	"github.com/yyle88/neatjson/neatjsons"
 	"github.com/yyle88/zaplog"
@@ -71,17 +72,26 @@ func main() {
 		order := &demo2models.Order{}
 		orderColumns := order.Columns()
 
+		userOrder := &UserOrder{}
+
 		var results []*UserOrder
 		must.Done(db.Table(user.TableName()).
 			Select(userColumns.ColumnOperationClass.MergeStmts(
-				userColumns.ID.WithTable(user).AsAlias("user_id"),
-				userColumns.Name.WithTable(user).AsAlias("user_name"),
-				orderColumns.ProductName.WithTable(order).Name(),
-				orderColumns.ID.WithTable(order).AsAlias("order_id"),
-				orderColumns.Amount.WithTable(order).AsAlias("order_amount"),
+				userColumns.ID.WithTable(user).
+					AsAlias("user_id"), //直接使用别名
+				userColumns.Name.WithTable(user).
+					AsName("user_name"), //指定目标列名
+				orderColumns.ProductName.WithTable(order).Name(), //这里不建议不指定别名
+				orderColumns.ID.WithTable(order).
+					AsName(gormcnm.Cnm(userOrder.OrderID, "order_id")), //指定目标列名，这是高级的用法能够避免类型不匹配
+				orderColumns.Amount.WithTable(order).
+					AsName(gormcnm.New[float64]("order_amount")), //指定目标列名，同时限制类型
 			)).
-			Joins(userColumns.LEFTJOIN(order.TableName()).On(orderColumns.UserID.WithTable(order).Eq(userColumns.ID.WithTable(user)))).
-			Order(userColumns.ID.WithTable(user).Ob("asc").Ob(orderColumns.ID.WithTable(order).Ob("desc")).Ox()).
+			Joins(userColumns.LEFTJOIN(order.TableName()).
+				On(orderColumns.UserID.WithTable(order).
+					Eq(userColumns.ID.WithTable(user)))).
+			Order(userColumns.ID.WithTable(user).Ob("asc").
+				Ob(orderColumns.ID.WithTable(order).Ob("desc")).Ox()).
 			Scan(&results).Error)
 		zaplog.SUG.Debug(neatjsons.S(results))
 	}

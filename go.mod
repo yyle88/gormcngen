@@ -8,7 +8,7 @@ require (
 	github.com/yyle88/done v1.0.18
 	github.com/yyle88/erero v1.0.14
 	github.com/yyle88/formatgo v1.0.19
-	github.com/yyle88/gormcnm v1.0.43
+	github.com/yyle88/gormcnm v1.0.44
 	github.com/yyle88/must v0.0.9
 	github.com/yyle88/neatjson v0.0.10
 	github.com/yyle88/osexistpath v0.0.13
