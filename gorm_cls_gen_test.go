@@ -26,10 +26,10 @@ func TestConfigs_Generate(t *testing.T) {
 	path := runpath.Path()
 	t.Log(path)
 
-	options := &gormcngen.Options{
-		ExportGeneratedStruct: true,
-		UseTagName:            true,
-	}
+	options := gormcngen.NewOptions().
+		WithExportGeneratedStruct(true).
+		WithUseTagName(true)
+
 	cfg := gormcngen.NewConfigs([]interface{}{
 		&Example{},
 		&Demo{},

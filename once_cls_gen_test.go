@@ -20,7 +20,7 @@ func TestGen(t *testing.T) {
 		UpdatedAt time.Time `gorm:"autoUpdateTime"`
 	}
 
-	config := gormcngen.NewSchemaConfig(&Example{}, &gormcngen.Options{})
+	config := gormcngen.NewSchemaConfig(&Example{}, gormcngen.NewOptions())
 	output := config.Gen()
 	t.Log(output.GetMethodCode())
 	t.Log(output.GetStructCode())
@@ -35,9 +35,10 @@ func TestGen_UseTagName(t *testing.T) {
 		UpdatedAt time.Time `gorm:"autoUpdateTime"`
 	}
 
-	config := gormcngen.NewSchemaConfig(&Example{}, &gormcngen.Options{
-		UseTagName: true,
-	})
+	options := gormcngen.NewOptions().
+		WithUseTagName(true)
+
+	config := gormcngen.NewSchemaConfig(&Example{}, options)
 	output := config.Gen()
 	t.Log(output.GetMethodCode())
 	t.Log(output.GetStructCode())
@@ -52,10 +53,11 @@ func TestGen_ExcludeUntaggedFields(t *testing.T) {
 		UpdatedAt time.Time `gorm:"autoUpdateTime"`
 	}
 
-	config := gormcngen.NewSchemaConfig(&Example{}, &gormcngen.Options{
-		UseTagName:            true,
-		ExcludeUntaggedFields: true,
-	})
+	options := gormcngen.NewOptions().
+		WithUseTagName(true).
+		WithExcludeUntaggedFields(true)
+
+	config := gormcngen.NewSchemaConfig(&Example{}, options)
 	output := config.Gen()
 	t.Log(output.GetMethodCode())
 	t.Log(output.GetStructCode())
@@ -70,10 +72,11 @@ func TestGen_ColumnsMethodRecvName(t *testing.T) {
 		UpdatedAt time.Time `gorm:"autoUpdateTime"`
 	}
 
-	config := gormcngen.NewSchemaConfig(&Example{}, &gormcngen.Options{
-		UseTagName:            true,
-		ColumnsMethodRecvName: "example",
-	})
+	options := gormcngen.NewOptions().
+		WithUseTagName(true).
+		WithColumnsMethodRecvName("example")
+
+	config := gormcngen.NewSchemaConfig(&Example{}, options)
 	output := config.Gen()
 	t.Log(output.GetMethodCode())
 	t.Log(output.GetStructCode())
@@ -88,11 +91,12 @@ func TestGen_ColumnsCheckFieldType(t *testing.T) {
 		UpdatedAt time.Time `gorm:"autoUpdateTime"`
 	}
 
-	config := gormcngen.NewSchemaConfig(&Example{}, &gormcngen.Options{
-		UseTagName:            true,
-		ColumnsMethodRecvName: "example",
-		ColumnsCheckFieldType: true,
-	})
+	options := gormcngen.NewOptions().
+		WithUseTagName(true).
+		WithColumnsMethodRecvName("example").
+		WithColumnsCheckFieldType(true)
+
+	config := gormcngen.NewSchemaConfig(&Example{}, options)
 	output := config.Gen()
 	t.Log(output.GetMethodCode())
 	t.Log(output.GetStructCode())

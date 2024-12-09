@@ -27,17 +27,6 @@ type SchemaConfig struct {
 	options    *Options       // Additional configuration options.// 额外的配置选项。
 }
 
-// Options Configuration options for controlling the generation behavior.
-// Options 用于控制生成行为的配置选项。
-type Options struct {
-	ExportGeneratedStruct bool   // Generate exported or non-exported structures.// 是否生成导出或非导出的结构体。
-	UseTagName            bool   // Use tag names as field names if set.// 是否使用标签名作为字段名。
-	TagKeyName            string // Tag key to store field names.// 存储字段名的标签键。
-	ExcludeUntaggedFields bool   // Skip fields without tags.// 跳过没有标签的字段。
-	ColumnsMethodRecvName string // Columns method receiver name // (某某某 *T) Columns 函数的接受者字符串
-	ColumnsCheckFieldType bool   // Columns method check field type // (某某某 *T) Columns 是否检查字段类型
-}
-
 // NewSchemaConfig Creates a Config instance for the given destination model and options.
 // NewSchemaConfig 为指定的目标模型和选项创建 Config 实例。
 func NewSchemaConfig(object interface{}, options *Options) *SchemaConfig {
@@ -53,7 +42,7 @@ func NewSchemaConfig(object interface{}, options *Options) *SchemaConfig {
 	const methodName = "Columns"
 
 	var structName string
-	if !options.ExportGeneratedStruct {
+	if !options.exportGeneratedStruct {
 		structName = utils.ConvertToNotExportable(sch.Name) + structNameSuffix
 	} else {
 		structName = sch.Name + structNameSuffix // 通常定义的结构体名称是导出的
@@ -110,7 +99,7 @@ func (c *Config) Gen() *ColumnsMethodStructOutput {
 	structPtx.Println(fmt.Sprintf("type %s struct{", c.structName))
 
 	methodPtx := utils.NewPTX()
-	methodPtx.Println(fmt.Sprintf("func (%s*%s) %s() *%s {", c.options.ColumnsMethodRecvName, c.sch.Name, c.methodName, c.structName))
+	methodPtx.Println(fmt.Sprintf("func (%s*%s) %s() *%s {", c.options.columnsMethodRecvName, c.sch.Name, c.methodName, c.structName))
 
 	operationClass := reflect.TypeOf(gormcnm.ColumnOperationClass{})
 	pkgNameGormCnm := filepath.Base(operationClass.PkgPath())
@@ -121,8 +110,10 @@ func (c *Config) Gen() *ColumnsMethodStructOutput {
 
 	const indentPrefix = "   " // 用于代码对齐的缩进（3个空格）
 
-	structPtx.Println(indentPrefix, "// Embedding operation functions make it easy to use // 继承操作函数便于使用")
-	structPtx.Println(indentPrefix, fmt.Sprintf("%s.%s", pkgNameGormCnm, operationClass.Name()))
+	if c.options.embedColumnOperations {
+		structPtx.Println(indentPrefix, "// Embedding operation functions make it easy to use // 继承操作函数便于使用")
+		structPtx.Println(indentPrefix, fmt.Sprintf("%s.%s", pkgNameGormCnm, operationClass.Name()))
+	}
 	structPtx.Println(indentPrefix, "// The column names and types of the model's columns // 模型各列的列名和类型")
 
 	methodPtx.Println(fmt.Sprintf("	return &%s{", c.structName))
@@ -143,8 +134,8 @@ func (c *Config) Gen() *ColumnsMethodStructOutput {
 
 		structPtx.Println(indentPrefix, newStructFieldName, fmt.Sprintf("%s.ColumnName[%s]", pkgNameGormCnm, columnGoTypeName))
 
-		dbColumnName := tern.BFF(c.options.ColumnsMethodRecvName != "" && c.options.ColumnsCheckFieldType, func() string {
-			return fmt.Sprintf(`%s.Cnm(%s.%s, "%s")`, pkgNameGormCnm, c.options.ColumnsMethodRecvName, field.Name, field.DBName)
+		dbColumnName := tern.BFF(c.options.columnsMethodRecvName != "" && c.options.columnsCheckFieldType, func() string {
+			return fmt.Sprintf(`%s.Cnm(%s.%s, "%s")`, pkgNameGormCnm, c.options.columnsMethodRecvName, field.Name, field.DBName)
 		}, func() string {
 			return `"` + field.DBName + `"`
 		})
@@ -172,8 +163,8 @@ func (c *Config) Gen() *ColumnsMethodStructOutput {
 // Resolves the new field name based on tags and options.
 // 根据标签和选项解析新字段名称。
 func (c *Config) resolveNewFieldName(field *schema.Field) (string, bool) {
-	if c.options.UseTagName {
-		var tagKeyName = zerotern.VV(c.options.TagKeyName, "cnm")
+	if c.options.useTagName {
+		var tagKeyName = zerotern.VV(c.options.tagKeyName, "cnm")
 
 		name, ok := field.Tag.Lookup(tagKeyName)
 		if ok {
@@ -182,7 +173,7 @@ func (c *Config) resolveNewFieldName(field *schema.Field) (string, bool) {
 			}
 			return name, true
 		} else {
-			if c.options.ExcludeUntaggedFields {
+			if c.options.excludeUntaggedFields {
 				return "", false
 			}
 			return field.Name, true

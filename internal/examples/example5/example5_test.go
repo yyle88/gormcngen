@@ -12,11 +12,11 @@ func TestGenerate(t *testing.T) {
 	absPath := osmustexist.FILE(runtestpath.SrcPath(t))
 	t.Log(absPath)
 
-	options := &gormcngen.Options{
-		ExportGeneratedStruct: false,
-		ColumnsMethodRecvName: "one",
-		ColumnsCheckFieldType: true, //这是新特性，非常建议启用
-	}
+	options := gormcngen.NewOptions().
+		WithExportGeneratedStruct(false). //中间类型名称的样式为可导出的 ExampleColumns
+		WithColumnsMethodRecvName("one").
+		WithColumnsCheckFieldType(true) //这是新特性，非常建议启用
+
 	cfg := gormcngen.NewConfigs([]interface{}{&Person{}, &Example{}}, options, absPath)
 	cfg.Gen()
 }

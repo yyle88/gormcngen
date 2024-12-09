@@ -12,7 +12,9 @@ func TestGenerate(t *testing.T) {
 	absPath := osmustexist.FILE(runtestpath.SrcPath(t))
 	t.Log(absPath)
 
-	options := &gormcngen.Options{ExportGeneratedStruct: false}
+	options := gormcngen.NewOptions().
+		WithExportGeneratedStruct(false) //中间类型名称的样式为非导出的 exampleColumns
+
 	cfg := gormcngen.NewConfigs([]interface{}{&Person{}, &Example{}}, options, absPath)
 	cfg.Gen()
 }
