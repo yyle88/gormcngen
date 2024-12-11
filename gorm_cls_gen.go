@@ -1,7 +1,6 @@
 package gormcngen
 
 import (
-	"fmt"
 	"go/ast"
 	"go/token"
 	"os"
@@ -127,7 +126,24 @@ func (cfg *Configs) Gen() {
 			astFile, _ := astBundle.GetBundle()
 
 			// Locate the AST definition of the struct. // 查找结构体的 AST 定义
+			// Attempt to find the struct declaration in the AST by its name.
 			structTypeDeclaration, ok := syntaxgo_search.FindStructDeclarationByName(astFile, schemaConfig.structName)
+			if !ok {
+				// If the struct declaration was not found, check if we should ignore the exportable status.
+				// 如果没有找到结构体声明，检查是否需要忽略导出状态
+				if schemaConfig.options.matchIgnoreExportable {
+					// If the struct name is not found, toggle the exportable statue of the struct name.
+					// 如果结构体名称未找到，则切换结构体名称的导出性（首字母大小写）
+					newStructName := utils.ToggleExportable(schemaConfig.structName)
+					// If the toggled struct name is different from the original, try searching again with the new name.
+					// 如果切换后的结构体名称与原名称不同，尝试使用新名称再次查找
+					if newStructName != schemaConfig.structName {
+						// Attempt to find the struct declaration by the new name with the toggled exportable.
+						// 尝试使用切换后的名称查找结构体声明
+						structTypeDeclaration, ok = syntaxgo_search.FindStructDeclarationByName(astFile, newStructName)
+					}
+				}
+			}
 			if ok {
 				// If the struct already exists, prepare for updating its code block. // 如果结构体已存在，准备更新代码块
 				editElements = append(editElements, &EditElement{
@@ -204,9 +220,6 @@ func (cfg *Configs) Gen() {
 			ReferencedTypes: nil,
 			InferredObjects: []any{gormcnm.ColumnOperationClass{}},
 		}
-		fmt.Println("woca1")
-		fmt.Println(string(srcNode.fileSource))
-		fmt.Println("woca2")
 		srcNode.fileSource = option.InjectImports(srcNode.fileSource)
 	}
 

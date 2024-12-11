@@ -27,7 +27,7 @@ func TestConfigs_Generate(t *testing.T) {
 	t.Log(path)
 
 	options := gormcngen.NewOptions().
-		WithExportGeneratedStruct(true).
+		WithColumnClassExportable(true).
 		WithUseTagName(true)
 
 	cfg := gormcngen.NewConfigs([]interface{}{

@@ -24,6 +24,16 @@ func ConvertToNotExportable(s string) string {
 	return string(runes)
 }
 
-func IsExportable(fieldName string) bool {
-	return unicode.IsUpper(([]rune(fieldName))[0])
+func IsExportable(name string) bool {
+	return unicode.IsUpper(([]rune(name))[0])
+}
+
+func ToggleExportable(name string) string {
+	runes := []rune(name)
+	if unicode.IsUpper(runes[0]) {
+		runes[0] = unicode.ToLower(runes[0])
+	} else if unicode.IsLower(runes[0]) {
+		runes[0] = unicode.ToUpper(runes[0])
+	}
+	return string(runes)
 }

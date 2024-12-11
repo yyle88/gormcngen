@@ -42,7 +42,7 @@ func NewSchemaConfig(object interface{}, options *Options) *SchemaConfig {
 	const methodName = "Columns"
 
 	var structName string
-	if !options.exportGeneratedStruct {
+	if !options.columnClassExportable {
 		structName = utils.ConvertToNotExportable(sch.Name) + structNameSuffix
 	} else {
 		structName = sch.Name + structNameSuffix // 通常定义的结构体名称是导出的

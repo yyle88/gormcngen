@@ -23,7 +23,7 @@ func TestGenerate(t *testing.T) {
 	objects := []any{&Example{}}
 
 	options := gormcngen.NewOptions().
-		WithExportGeneratedStruct(true). //中间类型名称的样式为可导出的 ExampleColumns
+		WithColumnClassExportable(true). //中间类型名称的样式为可导出的 ExampleColumns
 		WithEmbedColumnOperations(false)
 
 	cfg := gormcngen.NewConfigs(objects, options, absPath)

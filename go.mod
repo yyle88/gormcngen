@@ -16,10 +16,10 @@ require (
 	github.com/yyle88/rese v0.0.1
 	github.com/yyle88/runpath v1.0.22
 	github.com/yyle88/sortslice v1.0.6
-	github.com/yyle88/syntaxgo v0.0.39
+	github.com/yyle88/syntaxgo v0.0.41
 	github.com/yyle88/tern v0.0.3
 	github.com/yyle88/zaplog v0.0.16
-	gorm.io/driver/sqlite v1.5.6
+	gorm.io/driver/sqlite v1.5.7
 	gorm.io/gorm v1.25.12
 )
 
@@ -33,7 +33,7 @@ require (
 	github.com/yyle88/sure v0.0.33 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.27.0 // indirect
-	golang.org/x/exp v0.0.0-20241204233417-43b7b7cde48d // indirect
+	golang.org/x/exp v0.0.0-20241210194714-1829a127f884 // indirect
 	golang.org/x/mod v0.22.0 // indirect
 	golang.org/x/sync v0.10.0 // indirect
 	golang.org/x/text v0.21.0 // indirect
