@@ -43,7 +43,7 @@ func NewSchemaConfig(object interface{}, options *Options) *SchemaConfig {
 
 	var structName string
 	if !options.columnClassExportable {
-		structName = utils.ConvertToNotExportable(sch.Name) + structNameSuffix
+		structName = utils.ConvertToUnexportable(sch.Name) + structNameSuffix
 	} else {
 		structName = sch.Name + structNameSuffix // 通常定义的结构体名称是导出的
 	}

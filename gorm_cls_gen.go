@@ -14,6 +14,7 @@ import (
 	"github.com/yyle88/syntaxgo/syntaxgo_ast"
 	"github.com/yyle88/syntaxgo/syntaxgo_astnode"
 	"github.com/yyle88/syntaxgo/syntaxgo_search"
+	"golang.org/x/exp/maps"
 )
 
 // CodeGenerationConfig defines the configuration of code generation.
@@ -134,7 +135,7 @@ func (cfg *Configs) Gen() {
 				if schemaConfig.options.matchIgnoreExportable {
 					// If the struct name is not found, toggle the exportable statue of the struct name.
 					// 如果结构体名称未找到，则切换结构体名称的导出性（首字母大小写）
-					newStructName := utils.ToggleExportable(schemaConfig.structName)
+					newStructName := utils.SwitchToggleExportable(schemaConfig.structName)
 					// If the toggled struct name is different from the original, try searching again with the new name.
 					// 如果切换后的结构体名称与原名称不同，尝试使用新名称再次查找
 					if newStructName != schemaConfig.structName {
@@ -216,7 +217,7 @@ func (cfg *Configs) Gen() {
 	// Inject the necessary imports into the source code. // 将必要的导入包注入源代码
 	for _, srcNode := range path2codeMap {
 		option := &syntaxgo_ast.PackageImportOptions{
-			Packages:        utils.GetMapKeys(srcNode.pkgImports),
+			Packages:        maps.Keys(srcNode.pkgImports),
 			ReferencedTypes: nil,
 			InferredObjects: []any{gormcnm.ColumnOperationClass{}},
 		}
