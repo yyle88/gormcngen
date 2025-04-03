@@ -74,9 +74,9 @@ func (cfg *Configs) Generate() {
 // Gen is the core method responsible for generating code based on the provided schemas.
 // Gen 是核心方法，负责根据提供的 schemas 生成代码
 func (cfg *Configs) Gen() {
-	// Define the EditElement struct to store information about code blocks that need editing. // 定义 EditElement 结构体，用于存储需要编辑的代码块信息
-	type EditElement struct {
-		sourceFilePath string          // Path to the source file containing the code block // 源文件路径
+	// Define the elementType struct to store information about code blocks that need editing. // 定义 elementType 结构体，用于存储需要编辑的代码块信息
+	type elementType struct {
+		sourcePath     string          // Path to the source file containing the code block // 源文件路径
 		astNode        ast.Node        // AST node representing the code block // 代码块对应的 AST 节点
 		exist          bool            // Flag indicating whether the code block already exists // 标志位，指示代码块是否已存在
 		newSourceBlock string          // The new content of the code block to be inserted // 新代码块内容
@@ -86,7 +86,7 @@ func (cfg *Configs) Gen() {
 	const offsetStep = 100 // Offset step used for positioning new code blocks // 用于定位新代码块的偏移量步长
 
 	// Create a slice to store all elements that require edits. // 创建一个切片，用于存储所有需要编辑的元素
-	var editElements = make([]*EditElement, 0, len(cfg.schemas)*2)
+	var editingElements = make([]*elementType, 0, len(cfg.schemas)*2)
 
 	// Iterate through each schema configuration to generate the corresponding code. // 遍历每个 schema 配置，生成相应的代码
 	for idx, schemaConfig := range cfg.schemas {
@@ -102,8 +102,8 @@ func (cfg *Configs) Gen() {
 			methodTypeDeclaration, ok := syntaxgo_search.FindFunctionByReceiverAndName(astFile, schemaConfig.sch.Name, schemaConfig.methodName)
 			if ok {
 				// If the method already exists, prepare for updating its code block. // 如果方法已存在，准备更新代码块
-				editElements = append(editElements, &EditElement{
-					sourceFilePath: path,
+				editingElements = append(editingElements, &elementType{
+					sourcePath:     path,
 					astNode:        methodTypeDeclaration,
 					exist:          true,
 					newSourceBlock: output.methodCode,
@@ -111,8 +111,8 @@ func (cfg *Configs) Gen() {
 				})
 			} else {
 				// If the method does not exist, prepare for adding a new code block. // 如果方法不存在，准备添加新代码块
-				editElements = append(editElements, &EditElement{
-					sourceFilePath: path,
+				editingElements = append(editingElements, &elementType{
+					sourcePath:     path,
 					astNode:        syntaxgo_astnode.NewNode(token.Pos(offsetStep*idx)+1, 0),
 					exist:          false,
 					newSourceBlock: output.methodCode,
@@ -147,8 +147,8 @@ func (cfg *Configs) Gen() {
 			}
 			if ok {
 				// If the struct already exists, prepare for updating its code block. // 如果结构体已存在，准备更新代码块
-				editElements = append(editElements, &EditElement{
-					sourceFilePath: path,
+				editingElements = append(editingElements, &elementType{
+					sourcePath:     path,
 					astNode:        structTypeDeclaration,
 					exist:          true,
 					newSourceBlock: output.structCode,
@@ -156,8 +156,8 @@ func (cfg *Configs) Gen() {
 				})
 			} else {
 				// If the struct does not exist, prepare for adding a new code block. // 如果结构体不存在，准备添加新代码块
-				editElements = append(editElements, &EditElement{
-					sourceFilePath: path,
+				editingElements = append(editingElements, &elementType{
+					sourcePath:     path,
 					astNode:        syntaxgo_astnode.NewNode(token.Pos(offsetStep*idx)+2, 0),
 					exist:          false,
 					newSourceBlock: output.structCode,
@@ -168,7 +168,7 @@ func (cfg *Configs) Gen() {
 	}
 
 	// Sort the elements based on their existence, with existing code blocks prioritized. // 根据代码块的存在性进行排序，优先处理已存在的代码块
-	sortslice.SortVStable[*EditElement](editElements, func(a, b *EditElement) bool {
+	sortslice.SortVStable[*elementType](editingElements, func(a, b *elementType) bool {
 		if a.exist != b.exist {
 			return a.exist // Sort existing code blocks to the front // 已存在的代码块排在前面
 		} else {
@@ -181,52 +181,52 @@ func (cfg *Configs) Gen() {
 	})
 
 	// Map file paths to their corresponding source code and imports. // 将文件路径与其对应的源代码和导入包映射
-	type sourceImportsTuple struct {
-		fileSource []byte          // Source code of the go file // 源文件的完整源代码
+	type sourceAndImportsTuple struct {
+		sourceCode []byte          // Source code of the go file // 源文件的完整源代码
 		pkgImports map[string]bool // Required import statements // 需要导入的包
 	}
 
-	var path2codeMap = map[string]*sourceImportsTuple{} // 文件路径与源代码映射
+	var path2codeMap = map[string]*sourceAndImportsTuple{} // 文件路径与源代码映射
 
 	// Initialize the mapping for each file that requires editing. // 为每个需要编辑的文件初始化映射
-	for _, elem := range editElements {
-		if _, ok := path2codeMap[elem.sourceFilePath]; !ok {
-			path2codeMap[elem.sourceFilePath] = &sourceImportsTuple{
-				fileSource: done.VAE(os.ReadFile(elem.sourceFilePath)).Done(), // Read the existing source code from the file // 读取文件的现有源代码
-				pkgImports: map[string]bool{},                                 // Initialize with an empty set of imports // 初始化为空的导入包集合
+	for _, elem := range editingElements {
+		if _, ok := path2codeMap[elem.sourcePath]; !ok {
+			path2codeMap[elem.sourcePath] = &sourceAndImportsTuple{
+				sourceCode: done.VAE(os.ReadFile(elem.sourcePath)).Done(), // Read the existing source code from the file // 读取文件的现有源代码
+				pkgImports: map[string]bool{},                             // Initialize with an empty set of imports // 初始化为空的导入包集合
 			}
 		}
 	}
 
 	// Apply changes to the source code for each file based on the collected edit elements. // 根据收集的编辑元素更新每个文件的源代码
-	for _, elem := range editElements {
-		srcNode := path2codeMap[elem.sourceFilePath]
+	for _, elem := range editingElements {
+		tuple := path2codeMap[elem.sourcePath]
 		if elem.exist { // If the code block exists, replace it with the new content. // 如果代码块已存在，用新内容替换它
-			srcNode.fileSource = syntaxgo_astnode.ChangeNodeCodeSetSomeNewLines(srcNode.fileSource, elem.astNode, []byte(elem.newSourceBlock), 2)
+			tuple.sourceCode = syntaxgo_astnode.ChangeNodeCodeSetSomeNewLines(tuple.sourceCode, elem.astNode, []byte(elem.newSourceBlock), 2)
 		} else { // If the code block does not exist, append the new content. // 如果代码块不存在，追加新内容
-			srcNode.fileSource = append(srcNode.fileSource, byte('\n'), byte('\n'))
+			tuple.sourceCode = append(tuple.sourceCode, byte('\n'), byte('\n'))
 			codeBlockBytes := []byte(elem.newSourceBlock)
-			srcNode.fileSource = append(srcNode.fileSource, codeBlockBytes...)
+			tuple.sourceCode = append(tuple.sourceCode, codeBlockBytes...)
 		}
 		// Add any required imports. // 添加所需的导入包
 		for pkgPath := range elem.pkgImports {
-			srcNode.pkgImports[pkgPath] = true
+			tuple.pkgImports[pkgPath] = true
 		}
 	}
 
 	// Inject the necessary imports into the source code. // 将必要的导入包注入源代码
-	for _, srcNode := range path2codeMap {
+	for _, tuple := range path2codeMap {
 		option := &syntaxgo_ast.PackageImportOptions{
-			Packages:        maps.Keys(srcNode.pkgImports),
+			Packages:        maps.Keys(tuple.pkgImports),
 			ReferencedTypes: nil,
 			InferredObjects: []any{gormcnm.ColumnOperationClass{}},
 		}
-		srcNode.fileSource = option.InjectImports(srcNode.fileSource)
+		tuple.sourceCode = option.InjectImports(tuple.sourceCode)
 	}
 
 	// Format the updated source code and write it back to the respective files. // 格式化更新后的源代码，并写回相应的文件
-	for absPath, srcNode := range path2codeMap {
-		newSource := done.VAE(formatgo.FormatBytes(srcNode.fileSource)).Nice()
+	for absPath, tuple := range path2codeMap {
+		newSource := done.VAE(formatgo.FormatBytes(tuple.sourceCode)).Nice()
 		done.Done(utils.WriteFile(absPath, newSource))
 	}
 }

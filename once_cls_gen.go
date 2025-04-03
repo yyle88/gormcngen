@@ -69,9 +69,9 @@ func NewConfig(sch *schema.Schema, structName string, methodName string, options
 // ColumnsMethodStructOutput Structure representing the generated method and struct code with package imports.
 // ColumnsMethodStructOutput 表示生成的方法和结构体代码，以及涉及的包导入信息。
 type ColumnsMethodStructOutput struct {
-	methodCode string          // Code for the generated method.// 生成的方法代码。
-	structCode string          // Code for the generated structure.// 生成的结构体代码。
-	pkgImports map[string]bool // Package imports required by the generated code.// 生成代码需要的包导入。
+	methodCode string          // Code for the generated method. // 生成的方法代码。
+	structCode string          // Code for the generated structure. // 生成的结构体代码。
+	pkgImports map[string]bool // Package imports required. // 生成的代码需要导入的的包。
 }
 
 func (x *ColumnsMethodStructOutput) GetMethodCode() string {

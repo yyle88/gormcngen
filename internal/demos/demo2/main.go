@@ -4,7 +4,7 @@ import (
 	"github.com/yyle88/done"
 	"github.com/yyle88/gormcngen/internal/demos/demo2/demo2models"
 	"github.com/yyle88/gormcnm"
-	"github.com/yyle88/gormcnm/gormcnqs"
+	"github.com/yyle88/gormcnm/gormcnmstub"
 	"github.com/yyle88/must"
 	"github.com/yyle88/neatjson/neatjsons"
 	"github.com/yyle88/zaplog"
@@ -77,7 +77,7 @@ func main() {
 
 		var results []*UserOrder
 		must.Done(db.Table(user.TableName()).
-			Select(gormcnqs.MergeStmts(
+			Select(gormcnmstub.MergeStmts(
 				userColumns.ID.WithTable(user).
 					AsAlias("user_id"), //直接使用别名
 				userColumns.Name.WithTable(user).
