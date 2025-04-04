@@ -8,12 +8,12 @@ require (
 	github.com/yyle88/done v1.0.24
 	github.com/yyle88/erero v1.0.20
 	github.com/yyle88/formatgo v1.0.23
-	github.com/yyle88/gormcnm v1.0.50
+	github.com/yyle88/gormcnm v1.0.52
 	github.com/yyle88/must v0.0.20
 	github.com/yyle88/neatjson v0.0.12
 	github.com/yyle88/osexistpath v0.0.17
 	github.com/yyle88/printgo v1.0.5
-	github.com/yyle88/rese v0.0.8
+	github.com/yyle88/rese v0.0.9
 	github.com/yyle88/runpath v1.0.23
 	github.com/yyle88/sortslice v1.0.7
 	github.com/yyle88/syntaxgo v0.0.48

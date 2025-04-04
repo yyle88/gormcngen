@@ -4,6 +4,7 @@ import (
 	"go/ast"
 	"go/token"
 	"os"
+	"sync/atomic"
 
 	"github.com/yyle88/done"
 	"github.com/yyle88/formatgo"
@@ -83,13 +84,14 @@ func (cfg *Configs) Gen() {
 		pkgImports     map[string]bool // Set of new import statements to be added // 需要添加的导入包集合
 	}
 
-	const offsetStep = 100 // Offset step used for positioning new code blocks // 用于定位新代码块的偏移量步长
+	// determine the position-sequence of new code blocks. // 确定新增代码块的顺序位置。
+	var newCodeSequence atomic.Int64
 
 	// Create a slice to store all elements that require edits. // 创建一个切片，用于存储所有需要编辑的元素
-	var editingElements = make([]*elementType, 0, len(cfg.schemas)*2)
+	var editingElements = make([]*elementType, 0, len(cfg.schemas)*3)
 
 	// Iterate through each schema configuration to generate the corresponding code. // 遍历每个 schema 配置，生成相应的代码
-	for idx, schemaConfig := range cfg.schemas {
+	for _, schemaConfig := range cfg.schemas {
 		// Generate code for the current schema. // 生成当前 schema 的代码
 		output := schemaConfig.Gen()
 
@@ -98,26 +100,52 @@ func (cfg *Configs) Gen() {
 			astBundle := rese.P1(syntaxgo_ast.NewAstBundleV4(path))
 			astFile, _ := astBundle.GetBundle()
 
-			// Locate the AST definition of the method. // 查找方法的 AST 定义
-			methodTypeDeclaration, ok := syntaxgo_search.FindFunctionByReceiverAndName(astFile, schemaConfig.sch.Name, schemaConfig.methodName)
-			if ok {
-				// If the method already exists, prepare for updating its code block. // 如果方法已存在，准备更新代码块
-				editingElements = append(editingElements, &elementType{
-					sourcePath:     path,
-					astNode:        methodTypeDeclaration,
-					exist:          true,
-					newSourceBlock: output.methodCode,
-					pkgImports:     output.pkgImports,
-				})
-			} else {
-				// If the method does not exist, prepare for adding a new code block. // 如果方法不存在，准备添加新代码块
-				editingElements = append(editingElements, &elementType{
-					sourcePath:     path,
-					astNode:        syntaxgo_astnode.NewNode(token.Pos(offsetStep*idx)+1, 0),
-					exist:          false,
-					newSourceBlock: output.methodCode,
-					pkgImports:     output.pkgImports,
-				})
+			{
+				// Locate the AST definition of the method. // 查找方法的 AST 定义
+				methodTypeDeclaration, ok := syntaxgo_search.FindFunctionByReceiverAndName(astFile, schemaConfig.sch.Name, schemaConfig.methodName)
+				if ok {
+					// If the method already exists, prepare for updating its code block. // 如果方法已存在，准备更新代码块
+					editingElements = append(editingElements, &elementType{
+						sourcePath:     path,
+						astNode:        methodTypeDeclaration,
+						exist:          true,
+						newSourceBlock: output.methodCode,
+						pkgImports:     output.pkgImports,
+					})
+				} else {
+					// If the method does not exist, prepare for adding a new code block. // 如果方法不存在，准备添加新代码块
+					editingElements = append(editingElements, &elementType{
+						sourcePath:     path,
+						astNode:        syntaxgo_astnode.NewNode(token.Pos(newCodeSequence.Add(1)), 0),
+						exist:          false,
+						newSourceBlock: output.methodCode,
+						pkgImports:     output.pkgImports,
+					})
+				}
+			}
+
+			if schemaConfig.options.isGenFuncTableColumns {
+				// Locate the AST definition of the method. // 查找方法的 AST 定义
+				methodTypeDeclaration, ok := syntaxgo_search.FindFunctionByReceiverAndName(astFile, schemaConfig.sch.Name, schemaConfig.methodNameTableColumns)
+				if ok {
+					// If the method already exists, prepare for updating its code block. // 如果方法已存在，准备更新代码块
+					editingElements = append(editingElements, &elementType{
+						sourcePath:     path,
+						astNode:        methodTypeDeclaration,
+						exist:          true,
+						newSourceBlock: output.methodTableColumnsCode,
+						pkgImports:     output.pkgImports,
+					})
+				} else {
+					// If the method does not exist, prepare for adding a new code block. // 如果方法不存在，准备添加新代码块
+					editingElements = append(editingElements, &elementType{
+						sourcePath:     path,
+						astNode:        syntaxgo_astnode.NewNode(token.Pos(newCodeSequence.Add(1)), 0),
+						exist:          false,
+						newSourceBlock: output.methodTableColumnsCode,
+						pkgImports:     output.pkgImports,
+					})
+				}
 			}
 		}
 
@@ -158,7 +186,7 @@ func (cfg *Configs) Gen() {
 				// If the struct does not exist, prepare for adding a new code block. // 如果结构体不存在，准备添加新代码块
 				editingElements = append(editingElements, &elementType{
 					sourcePath:     path,
-					astNode:        syntaxgo_astnode.NewNode(token.Pos(offsetStep*idx)+2, 0),
+					astNode:        syntaxgo_astnode.NewNode(token.Pos(newCodeSequence.Add(1)), 0),
 					exist:          false,
 					newSourceBlock: output.structCode,
 					pkgImports:     output.pkgImports,

@@ -11,6 +11,7 @@ type Options struct {
 	columnsCheckFieldType bool   // Whether the Columns method checks field types. // Columns 函数是否检查字段类型
 	embedColumnOperations bool   // Whether to embed ColumnOperationClass. // 是否嵌套 ColumnOperationClass
 	matchIgnoreExportable bool   // Whether to ignore the exportable-case when matching. // 匹配时是否忽略导出性
+	isGenFuncTableColumns bool   // Whether to generate the table columns function. // 是否生成表表的列函数
 }
 
 // NewOptions creates a new Options instance with default values.
@@ -25,6 +26,7 @@ func NewOptions() *Options {
 		columnsCheckFieldType: false,
 		embedColumnOperations: true,
 		matchIgnoreExportable: true,
+		isGenFuncTableColumns: false,
 	}
 }
 
@@ -65,5 +67,10 @@ func (o *Options) WithEmbedColumnOperations(embedColumnOperations bool) *Options
 
 func (o *Options) WithMatchIgnoreExportable(matchIgnoreExportable bool) *Options {
 	o.matchIgnoreExportable = matchIgnoreExportable
+	return o
+}
+
+func (o *Options) WithIsGenFuncTableColumns(isGenFuncTableColumns bool) *Options {
+	o.isGenFuncTableColumns = isGenFuncTableColumns
 	return o
 }

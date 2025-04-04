@@ -102,3 +102,25 @@ func TestGen_ColumnsCheckFieldType(t *testing.T) {
 	t.Log(output.GetStructCode())
 	t.Log(neatjsons.S(output.GetPkgImports()))
 }
+
+func TestGen_IsGenFuncTableColumns(t *testing.T) {
+	type Example struct {
+		ID        int32     `gorm:"column:id;primaryKey;autoIncrement:true" json:"id"`
+		Name      string    `gorm:"not null,type:text" form:"name" json:"name" validate:"required" cnm:"V名称"`
+		CreatedAt time.Time `gorm:"autoCreateTime"`
+		UpdatedAt time.Time `gorm:"autoUpdateTime"`
+	}
+
+	options := gormcngen.NewOptions().
+		WithUseTagName(true).
+		WithColumnsMethodRecvName("example").
+		WithColumnsCheckFieldType(true).
+		WithIsGenFuncTableColumns(true)
+
+	config := gormcngen.NewSchemaConfig(&Example{}, options)
+	output := config.Gen()
+	t.Log(output.GetMethodCode())
+	t.Log(output.GetMethodTableColumnsCode())
+	t.Log(output.GetStructCode())
+	t.Log(neatjsons.S(output.GetPkgImports()))
+}

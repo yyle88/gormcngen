@@ -11,6 +11,7 @@ import (
 	"github.com/yyle88/erero"
 	"github.com/yyle88/gormcngen/internal/utils"
 	"github.com/yyle88/gormcnm"
+	"github.com/yyle88/must"
 	"github.com/yyle88/neatjson/neatjsons"
 	"github.com/yyle88/tern"
 	"github.com/yyle88/tern/zerotern"
@@ -21,34 +22,49 @@ import (
 // SchemaConfig Configuration of generating column methods and structures.
 // SchemaConfig 根据模型生成列方法和结构的配置。
 type SchemaConfig struct {
-	sch        *schema.Schema // Parsed schema from the model.// 结构体模型对应的数据表结构。
-	structName string         // Name of the generated structure.// 生成的结构体名称。
-	methodName string         // Name of the generated method.// 生成的方法名称。
-	options    *Options       // Additional configuration options.// 额外的配置选项。
+	sch                    *schema.Schema // Parsed schema from the model.// 结构体模型对应的数据表结构。
+	structName             string         // Name of the generated structure.// 生成的结构体名称。
+	methodName             string         // Name of the generated method.// 生成的方法名称。
+	methodNameTableColumns string
+	options                *Options // Additional configuration options.// 额外的配置选项。
 }
 
 // NewSchemaConfig Creates a Config instance for the given destination model and options.
 // NewSchemaConfig 为指定的目标模型和选项创建 Config 实例。
 func NewSchemaConfig(object interface{}, options *Options) *SchemaConfig {
 	sch := done.VCE(schema.Parse(object, &sync.Map{}, &schema.NamingStrategy{
-		SingularTable: false,
-		NoLowerCase:   false,
+		SingularTable: false, //这是gorm默认的
+		NoLowerCase:   false, //这是gorm默认的
 	})).Nice()
 
 	ShowSchemaEnglish(sch)
 	ShowSchemaChinese(sch)
 
+	namingConfig := NewNamingConfig(sch, options)
+
+	return NewConfig(sch, namingConfig, options)
+}
+
+type NamingConfig struct {
+	StructName             string
+	MethodNameColumns      string
+	MethodNameTableColumns string
+}
+
+func NewNamingConfig(sch *schema.Schema, options *Options) *NamingConfig {
 	const structNameSuffix = "Columns"
-	const methodName = "Columns"
+	structName := tern.BFF(options.columnClassExportable, func() string {
+		return sch.Name + structNameSuffix // 通常定义的结构体名称是导出的
+	}, func() string {
+		return utils.ConvertToUnexportable(sch.Name) + structNameSuffix
+	})
 
-	var structName string
-	if !options.columnClassExportable {
-		structName = utils.ConvertToUnexportable(sch.Name) + structNameSuffix
-	} else {
-		structName = sch.Name + structNameSuffix // 通常定义的结构体名称是导出的
+	namingConfig := &NamingConfig{
+		StructName:             structName,
+		MethodNameColumns:      "Columns",
+		MethodNameTableColumns: "TableColumns",
 	}
-
-	return NewConfig(sch, structName, methodName, options)
+	return namingConfig
 }
 
 // Config Configuration of generating column methods and structures.
@@ -57,49 +73,58 @@ type Config = SchemaConfig
 
 // NewConfig Creates a new Config instance with the provided schema, struct name, method name, and options.
 // NewConfig 创建一个新的 Config 实例，使用提供的 schema、结构体名称、方法名称和选项。
-func NewConfig(sch *schema.Schema, structName string, methodName string, options *Options) *Config {
+func NewConfig(sch *schema.Schema, namingConfig *NamingConfig, options *Options) *Config {
 	return &Config{
-		sch:        sch,
-		structName: structName,
-		methodName: methodName,
-		options:    options,
+		sch:                    sch,
+		structName:             namingConfig.StructName,
+		methodName:             namingConfig.MethodNameColumns,
+		methodNameTableColumns: namingConfig.MethodNameTableColumns,
+		options:                options,
 	}
 }
 
-// ColumnsMethodStructOutput Structure representing the generated method and struct code with package imports.
-// ColumnsMethodStructOutput 表示生成的方法和结构体代码，以及涉及的包导入信息。
-type ColumnsMethodStructOutput struct {
-	methodCode string          // Code for the generated method. // 生成的方法代码。
-	structCode string          // Code for the generated structure. // 生成的结构体代码。
-	pkgImports map[string]bool // Package imports required. // 生成的代码需要导入的的包。
+// GenOutput Structure representing the generated method and struct code with package imports.
+// GenOutput 表示生成的方法和结构体代码，以及涉及的包导入信息。
+type GenOutput struct {
+	methodCode             string // Code for the generated method. // 生成的方法代码。
+	methodTableColumnsCode string
+	structCode             string          // Code for the generated structure. // 生成的结构体代码。
+	pkgImports             map[string]bool // Package imports required. // 生成的代码需要导入的的包。
 }
 
-func (x *ColumnsMethodStructOutput) GetMethodCode() string {
+func (x *GenOutput) GetMethodCode() string {
 	return x.methodCode
 }
 
-func (x *ColumnsMethodStructOutput) GetStructCode() string {
+func (x *GenOutput) GetMethodTableColumnsCode() string {
+	return x.methodTableColumnsCode
+}
+
+func (x *GenOutput) GetStructCode() string {
 	return x.structCode
 }
 
-func (x *ColumnsMethodStructOutput) GetPkgImports() map[string]bool {
+func (x *GenOutput) GetPkgImports() map[string]bool {
 	return x.pkgImports
 }
 
 // Generate Generates the column method and struct based on the configuration.
 // Generate 根据配置生成列方法和结构。
-func (c *Config) Generate() *ColumnsMethodStructOutput {
+func (c *Config) Generate() *GenOutput {
 	return c.Gen()
 }
 
 // Gen Generates the column method and struct based on the configuration.
 // Gen 根据配置生成列方法和结构。
-func (c *Config) Gen() *ColumnsMethodStructOutput {
+func (c *Config) Gen() *GenOutput {
 	structPtx := utils.NewPTX()
 	structPtx.Println(fmt.Sprintf("type %s struct{", c.structName))
 
 	methodPtx := utils.NewPTX()
 	methodPtx.Println(fmt.Sprintf("func (%s*%s) %s() *%s {", c.options.columnsMethodRecvName, c.sch.Name, c.methodName, c.structName))
+
+	methodTableColumnsPtx := utils.NewPTX()
+	methodTableColumnsPtx.Println(fmt.Sprintf("func (%s*%s) %s(decoration gormcnm.ColumnNameDecoration) *%s {", c.options.columnsMethodRecvName, c.sch.Name, c.methodNameTableColumns, c.structName))
 
 	operationClass := reflect.TypeOf(gormcnm.ColumnOperationClass{})
 	pkgNameGormCnm := filepath.Base(operationClass.PkgPath())
@@ -108,15 +133,21 @@ func (c *Config) Gen() *ColumnsMethodStructOutput {
 		operationClass.PkgPath(): true,
 	}
 
-	const indentPrefix = "   " // 用于代码对齐的缩进（3个空格）
-
 	if c.options.embedColumnOperations {
-		structPtx.Println(indentPrefix, "// Embedding operation functions make it easy to use // 继承操作函数便于使用")
-		structPtx.Println(indentPrefix, fmt.Sprintf("%s.%s", pkgNameGormCnm, operationClass.Name()))
+		structPtx.Println("\t", "// Embedding operation functions make it easy to use // 继承操作函数便于使用")
+		structPtx.Println("\t", fmt.Sprintf("%s.%s", pkgNameGormCnm, operationClass.Name()))
 	}
-	structPtx.Println(indentPrefix, "// The column names and types of the model's columns // 模型各列的列名和类型")
+	structPtx.Println("\t", "// The column names and types of the model's columns // 模型各列的列名和类型")
 
-	methodPtx.Println(fmt.Sprintf("	return &%s{", c.structName))
+	if c.options.isGenFuncTableColumns {
+		must.Nice(c.options.columnsMethodRecvName)
+		must.True(c.options.columnsCheckFieldType)
+		methodPtx.Println(fmt.Sprintf("	return %s.%s(gormcnm.NewPlainDecoration())", c.options.columnsMethodRecvName, c.methodNameTableColumns))
+		methodTableColumnsPtx.Println(fmt.Sprintf("	return &%s{", c.structName))
+	} else {
+		methodPtx.Println(fmt.Sprintf("	return &%s{", c.structName))
+		methodTableColumnsPtx.Println(fmt.Sprintf("	panic(\"METHOD %s.%s IS NOT IMPLEMENTED\")", c.structName, c.methodNameTableColumns))
+	}
 	for _, field := range c.sch.Fields {
 		var columnGoTypeName string
 		if pkgPath := field.FieldType.PkgPath(); pkgPath == c.sch.ModelType.PkgPath() { // 如果在同一个包里，仅使用类型名
@@ -127,36 +158,49 @@ func (c *Config) Gen() *ColumnsMethodStructOutput {
 			}
 			columnGoTypeName = field.FieldType.String() // 使用完整类型名
 		}
-		newStructFieldName, ok := c.resolveNewFieldName(field)
+		structFieldName, ok := c.resolveNewFieldName(field)
 		if !ok {
 			continue // 某些场景下不需要获得列名
 		}
+		structPtx.Println("\t", structFieldName, fmt.Sprintf("%s.ColumnName[%s]", pkgNameGormCnm, columnGoTypeName))
 
-		structPtx.Println(indentPrefix, newStructFieldName, fmt.Sprintf("%s.ColumnName[%s]", pkgNameGormCnm, columnGoTypeName))
-
-		dbColumnName := tern.BFF(c.options.columnsMethodRecvName != "" && c.options.columnsCheckFieldType, func() string {
-			return fmt.Sprintf(`%s.Cnm(%s.%s, "%s")`, pkgNameGormCnm, c.options.columnsMethodRecvName, field.Name, field.DBName)
-		}, func() string {
-			return `"` + field.DBName + `"`
-		})
-
-		methodPtx.Println(indentPrefix, indentPrefix, fmt.Sprintf("%s:%s,", newStructFieldName, dbColumnName))
+		if c.options.isGenFuncTableColumns {
+			must.Nice(c.options.columnsMethodRecvName)
+			must.True(c.options.columnsCheckFieldType)
+			valueColumnName := fmt.Sprintf(`%s.Cmn(%s.%s, "%s", decoration)`, pkgNameGormCnm, c.options.columnsMethodRecvName, field.Name, field.DBName)
+			methodTableColumnsPtx.Println("\t\t", fmt.Sprintf("%s:%s,", structFieldName, valueColumnName))
+		} else {
+			valueColumnName := tern.BFF(c.options.columnsMethodRecvName != "" && c.options.columnsCheckFieldType, func() string {
+				return fmt.Sprintf(`%s.Cnm(%s.%s, "%s")`, pkgNameGormCnm, c.options.columnsMethodRecvName, field.Name, field.DBName)
+			}, func() string {
+				return `"` + field.DBName + `"`
+			})
+			methodPtx.Println("\t\t", fmt.Sprintf("%s:%s,", structFieldName, valueColumnName))
+		}
 	}
 	structPtx.Println("}")
-	methodPtx.Println("	}")
+	if c.options.isGenFuncTableColumns {
+		methodTableColumnsPtx.Println("\t}")
+	} else {
+		methodPtx.Println("\t}")
+	}
 	methodPtx.Println("}")
+	methodTableColumnsPtx.Println("}")
 
 	structCode := strings.TrimSpace(structPtx.String())
 	methodCode := strings.TrimSpace(methodPtx.String())
+	methodTableColumnsCode := strings.TrimSpace(methodTableColumnsPtx.String())
 
 	zaplog.SUG.Debug("---", "\n", methodCode)
+	zaplog.SUG.Debug("---", "\n", methodTableColumnsCode)
 	zaplog.SUG.Debug("---", "\n", structCode)
 	zaplog.SUG.Debug("---", "\n", neatjsons.S(pkgImports))
 
-	return &ColumnsMethodStructOutput{
-		methodCode: methodCode,
-		structCode: structCode,
-		pkgImports: pkgImports,
+	return &GenOutput{
+		methodCode:             methodCode,
+		methodTableColumnsCode: methodTableColumnsCode,
+		structCode:             structCode,
+		pkgImports:             pkgImports,
 	}
 }
 
