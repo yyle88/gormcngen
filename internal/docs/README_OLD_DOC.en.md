@@ -52,7 +52,7 @@ While many believe learning English is important, for developers, quickly comple
 
 You can also write code in other languages.  
 Using your native language not only helps improve efficiency but also makes complex business logic easier to implement.  
-For example, when a single developer writes code in English, the project code limit is about 50,000 lines. Using your native language could increase this limit several times, making it ideal for development during fragmented time.
+For example, when a single developer writes code in English, the project code limit is about 50,000 lines. Using your native language could increase this limit several times, making it suitable for development during fragmented time.
 
 ---
 
