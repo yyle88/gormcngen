@@ -15,6 +15,8 @@ import (
 	"github.com/yyle88/syntaxgo/syntaxgo_ast"
 	"github.com/yyle88/syntaxgo/syntaxgo_astnode"
 	"github.com/yyle88/syntaxgo/syntaxgo_search"
+	"github.com/yyle88/zaplog"
+	"go.uber.org/zap"
 	"golang.org/x/exp/maps"
 )
 
@@ -113,14 +115,19 @@ func (cfg *Configs) Gen() {
 						pkgImports:     output.pkgImports,
 					})
 				} else {
-					// If the method does not exist, prepare for adding a new code block. // 如果方法不存在，准备添加新代码块
-					editingElements = append(editingElements, &elementType{
-						sourcePath:     path,
-						astNode:        syntaxgo_astnode.NewNode(token.Pos(newCodeSequence.Add(1)), 0),
-						exist:          false,
-						newSourceBlock: output.methodCode,
-						pkgImports:     output.pkgImports,
-					})
+					// 当函数不存在时，是否生成它。前面的当函数已存在时，就必须更新它的内容，避免剩个不维护的函数，被其他逻辑误用
+					if schemaConfig.options.isGenNewSimpleColumns {
+						// If the method does not exist, prepare for adding a new code block. // 如果方法不存在，准备添加新代码块
+						editingElements = append(editingElements, &elementType{
+							sourcePath:     path,
+							astNode:        syntaxgo_astnode.NewNode(token.Pos(newCodeSequence.Add(1)), 0),
+							exist:          false,
+							newSourceBlock: output.methodCode,
+							pkgImports:     output.pkgImports,
+						})
+					} else {
+						zaplog.LOG.Debug("choose not gen new simple columns function so skip", zap.String("name", schemaConfig.sch.Name+"."+schemaConfig.methodName))
+					}
 				}
 			}
 
