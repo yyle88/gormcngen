@@ -251,12 +251,11 @@ func (cfg *Configs) Gen() {
 
 	// Inject the necessary imports into the source code. // 将必要的导入包注入源代码
 	for _, tuple := range path2codeMap {
-		option := &syntaxgo_ast.PackageImportOptions{
-			Packages:        maps.Keys(tuple.pkgImports),
-			ReferencedTypes: nil,
-			InferredObjects: []any{gormcnm.ColumnOperationClass{}},
-		}
-		tuple.sourceCode = option.InjectImports(tuple.sourceCode)
+		options := syntaxgo_ast.NewPackageImportOptions()
+		options.SetPkgPaths(maps.Keys(tuple.pkgImports))
+		options.SetInferredObject(gormcnm.ColumnOperationClass{})
+
+		tuple.sourceCode = options.InjectImports(tuple.sourceCode)
 	}
 
 	// Format the updated source code and write it back to the respective files. // 格式化更新后的源代码，并写回相应的文件

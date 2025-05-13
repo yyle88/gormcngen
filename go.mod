@@ -7,17 +7,17 @@ require (
 	github.com/stretchr/testify v1.10.0
 	github.com/yyle88/done v1.0.25
 	github.com/yyle88/erero v1.0.20
-	github.com/yyle88/formatgo v1.0.23
+	github.com/yyle88/formatgo v1.0.24
 	github.com/yyle88/gormcnm v1.0.53
-	github.com/yyle88/must v0.0.21
+	github.com/yyle88/must v0.0.23
 	github.com/yyle88/neatjson v0.0.12
 	github.com/yyle88/osexistpath v0.0.17
 	github.com/yyle88/printgo v1.0.5
 	github.com/yyle88/rese v0.0.10
 	github.com/yyle88/runpath v1.0.23
 	github.com/yyle88/sortslice v1.0.7
-	github.com/yyle88/syntaxgo v0.0.48
-	github.com/yyle88/tern v0.0.7
+	github.com/yyle88/syntaxgo v0.0.50
+	github.com/yyle88/tern v0.0.8
 	github.com/yyle88/zaplog v0.0.22
 	go.uber.org/zap v1.27.0
 	golang.org/x/exp v0.0.0-20250210185358-939b2ce775ac
