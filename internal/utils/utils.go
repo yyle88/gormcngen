@@ -1,13 +1,8 @@
 package utils
 
 import (
-	"os"
 	"unicode"
 )
-
-func WriteFile(path string, data []byte) error {
-	return os.WriteFile(path, data, 0644)
-}
 
 func ConvertToUnexportable(s string) string {
 	runes := []rune(s)

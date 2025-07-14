@@ -258,9 +258,9 @@ func (cfg *Configs) Gen() {
 		tuple.sourceCode = options.InjectImports(tuple.sourceCode)
 	}
 
-	// Format the updated source code and write it back to the respective files. // 格式化更新后的源代码，并写回相应的文件
+	// Format the updated source code and write it back to the respective files. // 格式化更新后的源代码，再写回相应的文件
 	for absPath, tuple := range path2codeMap {
 		newSource := done.VAE(formatgo.FormatBytes(tuple.sourceCode)).Nice()
-		done.Done(utils.WriteFile(absPath, newSource))
+		done.Done(os.WriteFile(absPath, newSource, 0644))
 	}
 }
