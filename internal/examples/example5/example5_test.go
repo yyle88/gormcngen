@@ -3,20 +3,37 @@ package example5
 import (
 	"testing"
 
-	"github.com/yyle88/gormcngen"
-	"github.com/yyle88/osexistpath/osmustexist"
-	"github.com/yyle88/runpath/runtestpath"
+	"github.com/brianvoe/gofakeit/v7"
+	"github.com/stretchr/testify/require"
+	"github.com/yyle88/gormcngen/internal/examples/example5/internal/models"
+	"github.com/yyle88/neatjson/neatjsons"
 )
 
-func TestGenerate(t *testing.T) {
-	absPath := osmustexist.FILE(runtestpath.SrcPath(t))
-	t.Log(absPath)
+// TestExample5 demonstrates column generation with custom receiver names
+// Tests both Person and Example models with gofakeit data generation
+//
+// TestExample5 演示使用自定义接收者名称的列生成
+// 测试 Person 和 Example 模型的 gofakeit 数据生成
+func TestExample5(t *testing.T) {
+	// Create person instance and generate fake data
+	// 创建 person 实例并生成虚假数据
+	person := &models.Person{}
+	require.NoError(t, gofakeit.Struct(&person))
+	t.Log(neatjsons.S(person))
 
-	options := gormcngen.NewOptions().
-		WithColumnClassExportable(false). //中间类型名称的样式为可导出的 ExampleColumns
-		WithColumnsMethodRecvName("one").
-		WithColumnsCheckFieldType(true) //这是新特性，非常建议启用
+	// Get person column mappings
+	// 获取 person 列映射
+	cls := person.Columns()
+	t.Log(neatjsons.S(cls))
 
-	cfg := gormcngen.NewConfigs([]interface{}{&Person{}, &Example{}}, options, absPath)
-	cfg.Gen()
+	// Create example instance and generate fake data
+	// 创建 example 实例并生成虚假数据
+	example := &models.Example{}
+	require.NoError(t, gofakeit.Struct(&example))
+	t.Log(neatjsons.S(example))
+
+	// Get example column mappings
+	// 获取 example 列映射
+	exampleCls := example.Columns()
+	t.Log(neatjsons.S(exampleCls))
 }

@@ -1,8 +1,11 @@
 package main
 
 import (
+	"fmt"
+
+	"github.com/google/uuid"
 	"github.com/yyle88/done"
-	"github.com/yyle88/gormcngen/internal/demos/demo2/demo2models"
+	"github.com/yyle88/gormcngen/internal/demos/demo2/internal/models"
 	"github.com/yyle88/gormcnm"
 	"github.com/yyle88/gormcnm/gormcnmstub"
 	"github.com/yyle88/must"
@@ -15,24 +18,25 @@ import (
 
 func main() {
 	//new db connection
-	db := done.VCE(gorm.Open(sqlite.Open("file::memory:?cache=private"), &gorm.Config{
+	dsn := fmt.Sprintf("file:db-%s?mode=memory&cache=shared", uuid.New().String())
+	db := done.VCE(gorm.Open(sqlite.Open(dsn), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Info),
 	})).Nice()
 
 	//create example data
-	must.Done(db.AutoMigrate(&demo2models.User{}))
-	must.Done(db.AutoMigrate(&demo2models.Order{}))
-	must.Done(db.Save(&demo2models.User{ID: 0, Name: "abc"}).Error)
-	must.Done(db.Save(&demo2models.User{ID: 0, Name: "uvw"}).Error)
-	must.Done(db.Save(&demo2models.User{ID: 0, Name: "xyz"}).Error)
+	must.Done(db.AutoMigrate(&models.User{}))
+	must.Done(db.AutoMigrate(&models.Order{}))
+	must.Done(db.Save(&models.User{ID: 0, Name: "abc"}).Error)
+	must.Done(db.Save(&models.User{ID: 0, Name: "uvw"}).Error)
+	must.Done(db.Save(&models.User{ID: 0, Name: "xyz"}).Error)
 
 	{
-		var users []*demo2models.User
+		var users []*models.User
 		must.Done(db.Find(&users).Error)
 		zaplog.SUG.Debug(neatjsons.S(users))
 	}
 
-	must.Done(db.Save([]*demo2models.Order{
+	must.Done(db.Save([]*models.Order{
 		{ID: 0, UserID: 1, ProductName: "A", Amount: 10},
 		{ID: 0, UserID: 1, ProductName: "B", Amount: 20},
 		{ID: 0, UserID: 1, ProductName: "C", Amount: 30},
@@ -45,7 +49,7 @@ func main() {
 	}).Error)
 
 	{
-		var orders []*demo2models.Order
+		var orders []*models.Order
 		must.Done(db.Find(&orders).Error)
 		zaplog.SUG.Debug(neatjsons.S(orders))
 	}
@@ -68,9 +72,9 @@ func main() {
 		zaplog.SUG.Debug(neatjsons.S(results))
 	}
 	{
-		user := &demo2models.User{}
+		user := &models.User{}
 		userColumns := user.Columns()
-		order := &demo2models.Order{}
+		order := &models.Order{}
 		orderColumns := order.Columns()
 
 		userOrder := &UserOrder{}

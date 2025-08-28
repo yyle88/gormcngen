@@ -3,18 +3,26 @@ package example1
 import (
 	"testing"
 
-	"github.com/yyle88/gormcngen"
-	"github.com/yyle88/osexistpath/osmustexist"
-	"github.com/yyle88/runpath/runtestpath"
+	"github.com/brianvoe/gofakeit/v7"
+	"github.com/stretchr/testify/require"
+	"github.com/yyle88/gormcngen/internal/examples/example1/internal/models"
+	"github.com/yyle88/neatjson/neatjsons"
 )
 
-func TestGenerate(t *testing.T) {
-	absPath := osmustexist.FILE(runtestpath.SrcPath(t))
-	t.Log(absPath)
+// TestExample1 demonstrates basic model column generation and usage
+// Shows how to use gofakeit to generate test data and verify column mappings
+//
+// TestExample1 演示基本的模型列生成和使用
+// 展示如何使用 gofakeit 生成测试数据并验证列映射
+func TestExample1(t *testing.T) {
+	// Create new person instance and fill with fake data
+	// 创建新的 person 实例并填充虚假数据
+	person := &models.Person{}
+	require.NoError(t, gofakeit.Struct(&person))
+	t.Log(neatjsons.S(person))
 
-	options := gormcngen.NewOptions().
-		WithColumnClassExportable(false) //中间类型名称的样式为非导出的 exampleColumns
-
-	cfg := gormcngen.NewConfigs([]interface{}{&Person{}, &Example{}}, options, absPath)
-	cfg.Gen()
+	// Get column mappings and log them
+	// 获取列映射并记录它们
+	cls := person.Columns()
+	t.Log(neatjsons.S(cls))
 }

@@ -1,7 +1,18 @@
+// Package gormcngen: Configuration options for intelligent code generation behavior
+// Provides fine-grained control over AST-based code generation process
+// Supports various generation modes, tag handling, and output customization
+//
+// gormcngen: 智能代码生成行为的配置选项
+// 提供对基于 AST 代码生成过程的精细控制
+// 支持各种生成模式、标签处理和输出自定义
 package gormcngen
 
-// Options Configuration options of the generation logic.
-// Options 用于控制生成行为的配置选项。
+// Options provides fine-grained control over code generation behavior
+// Configures various aspects of the intelligent code generation process
+// Controls struct export visibility, tag processing, field filtering, and method generation
+//
+// Options 配置智能代码生成过程的各个方面
+// 控制结构体导出可见性、标签处理、字段过滤和方法生成
 type Options struct {
 	columnClassExportable bool   // Whether to generate exported or non-exported structures. // 是否生成导出结构或非导出结构
 	useTagName            bool   // Whether to use tag names as field names. // 是否使用标签名作为字段名
@@ -15,8 +26,13 @@ type Options struct {
 	isGenNewSimpleColumns bool   // Whether to generate the plain columns function. // 是否生成简单的列函数
 }
 
-// NewOptions creates a new Options instance with default values.
-// NewOptions 用于创建一个具有默认值的 Options 实例。
+// NewOptions creates a new Options instance with sensible default values
+// Initializes configuration optimized for common use cases and best practices
+// Returns a pre-configured instance ready for customization via With methods
+//
+// NewOptions 创建一个具有合理默认值的 Options 实例
+// 初始化针对常见用例和最佳实践优化的配置
+// 返回一个预配置的实例，准备通过 With 方法进行自定义
 func NewOptions() *Options {
 	return &Options{
 		columnClassExportable: true,

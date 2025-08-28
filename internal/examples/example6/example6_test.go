@@ -3,21 +3,37 @@ package example6
 import (
 	"testing"
 
-	"github.com/yyle88/gormcngen"
-	"github.com/yyle88/osexistpath/osmustexist"
-	"github.com/yyle88/runpath/runtestpath"
+	"github.com/brianvoe/gofakeit/v7"
+	"github.com/stretchr/testify/require"
+	"github.com/yyle88/gormcngen/internal/examples/example6/internal/models"
+	"github.com/yyle88/neatjson/neatjsons"
 )
 
-func TestGenerate(t *testing.T) {
-	absPath := osmustexist.FILE(runtestpath.SrcPath(t))
-	t.Log(absPath)
+// TestExample6 demonstrates enhanced column generation with table decorations
+// Tests both Person and Example models with TableColumns method support
+//
+// TestExample6 演示使用表装饰的增强列生成
+// 测试支持 TableColumns 方法的 Person 和 Example 模型
+func TestExample6(t *testing.T) {
+	// Create person instance and generate fake data
+	// 创建 person 实例并生成虚假数据
+	person := &models.Person{}
+	require.NoError(t, gofakeit.Struct(&person))
+	t.Log(neatjsons.S(person))
 
-	options := gormcngen.NewOptions().
-		WithColumnClassExportable(true). //中间类型名称的样式为可导出的 ExampleColumns
-		WithColumnsMethodRecvName("one").
-		WithColumnsCheckFieldType(true). //这是新特性，非常建议启用
-		WithIsGenFuncTableColumns(true)
+	// Get person column mappings with table decoration support
+	// 获取支持表装饰的 person 列映射
+	cls := person.Columns()
+	t.Log(neatjsons.S(cls))
 
-	cfg := gormcngen.NewConfigs([]interface{}{&Person{}, &Example{}}, options, absPath)
-	cfg.Gen()
+	// Create example instance and generate fake data
+	// 创建 example 实例并生成虚假数据
+	example := &models.Example{}
+	require.NoError(t, gofakeit.Struct(&example))
+	t.Log(neatjsons.S(example))
+
+	// Get example column mappings with table decoration support
+	// 获取支持表装饰的 example 列映射
+	exampleCls := example.Columns()
+	t.Log(neatjsons.S(exampleCls))
 }

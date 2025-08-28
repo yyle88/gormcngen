@@ -1,3 +1,10 @@
+// Package gormcngen: Schema-based configuration and single-use code generation
+// Handles individual model schema analysis and targeted code generation
+// Provides precise control over column struct generation and method creation
+//
+// gormcngen: 基于 schema 的配置和单次使用代码生成
+// 处理单个模型 schema 分析和针对性代码生成
+// 提供对列结构体生成和方法创建的精确控制
 package gormcngen
 
 import (
@@ -19,18 +26,30 @@ import (
 	"gorm.io/gorm/schema"
 )
 
-// SchemaConfig Configuration of generating column methods and structures.
-// SchemaConfig 根据模型生成列方法和结构的配置。
+// SchemaConfig holds configuration for generating column methods and structures from GORM models
+// Contains parsed schema information along with generation options and naming preferences
+// Manages the complete lifecycle from schema analysis to code output generation
+//
+// SchemaConfig 保存从 GORM 模型生成列方法和结构体的配置
+// 包含已解析的 schema 信息以及生成选项和命名偏好
+// 管理从 schema 分析到代码输出生成的完整生命周期
 type SchemaConfig struct {
-	sch                    *schema.Schema // Parsed schema from the model.// 结构体模型对应的数据表结构。
-	structName             string         // Name of the generated structure.// 生成的结构体名称。
-	methodName             string         // Name of the generated method.// 生成的方法名称。
+	sch                    *schema.Schema // Parsed GORM schema from model struct // 从模型结构体解析的 GORM schema
+	structName             string         // Generated column struct name // 生成的列结构体名称
+	methodName             string         // Generated Columns() method name // 生成的 Columns() 方法名称
 	methodNameTableColumns string
-	options                *Options // Additional configuration options.// 额外的配置选项。
+	options                *Options // Generation behavior configuration options // 生成行为配置选项
 }
 
-// NewSchemaConfig Creates a Config instance for the given destination model and options.
-// NewSchemaConfig 为指定的目标模型和选项创建 Config 实例。
+// NewSchemaConfig creates a SchemaConfig instance from a GORM model and generation options
+// Parses the model structure using GORM schema parsing and applies naming strategies
+// Initializes schema analysis, shows debug information, and configures generation parameters
+// Returns a fully configured SchemaConfig ready for code generation
+//
+// NewSchemaConfig 从 GORM 模型和生成选项创建 SchemaConfig 实例
+// 使用 GORM schema 解析器解析模型结构并应用命名策略
+// 初始化 schema 分析，显示调试信息，并配置生成参数
+// 返回一个完全配置的 SchemaConfig，准备进行代码生成
 func NewSchemaConfig(object interface{}, options *Options) *SchemaConfig {
 	sch := done.VCE(schema.Parse(object, &sync.Map{}, &schema.NamingStrategy{
 		SingularTable: false, //这是gorm默认的

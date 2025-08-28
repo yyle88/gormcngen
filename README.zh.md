@@ -1,4 +1,13 @@
-# `gormcngen`: 赋予 GORM 模型使用 Columns() 获取列名的函数
+[![GitHub Workflow Status (branch)](https://img.shields.io/github/actions/workflow/status/yyle88/gormcngen/release.yml?branch=main&label=BUILD)](https://github.com/yyle88/gormcngen/actions/workflows/release.yml?query=branch%3Amain)
+[![GoDoc](https://pkg.go.dev/badge/github.com/yyle88/gormcngen)](https://pkg.go.dev/github.com/yyle88/gormcngen)
+[![Coverage Status](https://img.shields.io/coveralls/github/yyle88/gormcngen/master.svg)](https://coveralls.io/github/yyle88/gormcngen?branch=main)
+![Supported Go Versions](https://img.shields.io/badge/Go-1.22%2C%201.23-lightgrey.svg)
+[![GitHub Release](https://img.shields.io/github/release/yyle88/gormcngen.svg)](https://github.com/yyle88/gormcngen/releases)
+[![Go Report Card](https://goreportcard.com/badge/github.com/yyle88/gormcngen)](https://goreportcard.com/report/github.com/yyle88/gormcngen)
+
+# gormcngen
+
+`gormcngen`: 赋予 GORM 模型使用 Columns() 获取列名的函数
 
 就像 Java 生态系统中的 `MyBatis Plus`，它允许开发人员使用像 `Example::getName` 这样的表达式获取列名。
 
@@ -6,9 +15,78 @@
 
 `gormcngen` 也为 Go 模型赋予 **类型安全** 的列引用功能。
 
+---
+
+<!-- TEMPLATE (ZH) BEGIN: LANGUAGE NAVIGATION -->
 ## 英文文档
 
 [ENGLISH README](README.md)
+<!-- TEMPLATE (ZH) END: LANGUAGE NAVIGATION -->
+
+## 核心特性
+
+### 🔍 AST 级别精度
+- **深度模型分析**: 解析结构体字段、标签和嵌入类型
+- **GORM 标签提取**: 自动检测列名、类型和约束
+- **嵌入字段支持**: 处理 `gorm.Model` 和自定义嵌入结构体
+- **类型保护**: 在生成代码中维护精确的 Go 类型
+
+### 🚀 智能代码生成
+- **完美同步**: 生成的代码始终与你的模型匹配
+- **自定义列名**: 遵循 `gorm:"column:name"` 标签
+- **多语言支持**: 与 `cnm:"中文名"` 标签配合进行国际化开发
+- **增量更新**: 只重新生成有变化的内容
+
+### 🛠️ 开发体验
+- **简单编程接口**: 易于使用的 Go API，立即获得结果
+- **IDE 集成**: 生成的代码提供完整的智能提示支持
+- **构建系统友好**: 轻松集成 `go:generate` 指令
+- **版本控制安全**: 确定性输出，确保清洁的差异
+
+### 🏢 企业级就绪
+- **大型代码库支持**: 高效处理数百个模型
+- **自定义命名约定**: 可配置的输出模式
+- **验证和安全**: 内置检查防止无效生成
+- **文档生成**: 自动生成的注释解释列映射
+
+## 🏗️ 生态系统定位
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                    GORM Type-Safe Ecosystem                         │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐              │
+│  │  gormzhcn   │    │  gormmom    │    │  gormrepo   │              │
+│  │ Chinese API │───▶│ Native Lang │───▶│  Package    │─────┐        │
+│  │  Localize   │    │  Smart Tags │    │  Pattern    │     │        │
+│  └─────────────┘    └─────────────┘    └─────────────┘     │        │
+│         │                   │                              │        │
+│         │                   ▼                              ▼        │
+│         │            ┌─────────────┐              ┌─────────────┐   │
+│         │            │ gormcngen   │              │Application  │   │
+│         │            │Code Generate│─────────────▶│Custom Code  │   │
+│         │            │AST Operation│              │             │   │
+│         │            └─────────────┘              └─────────────┘   │
+│         │                   │                              ▲        │
+│         │                   ▼                              │        │
+│         └────────────▶┌─────────────┐◄─────────────────────┘        │
+│                       │   GORMCNM   │                               │
+│                       │ FOUNDATION  │                               │
+│                       │ Type-Safe   │                               │
+│                       │ Core Logic  │                               │
+│                       └─────────────┘                               │
+│                              │                                      │
+│                              ▼                                      │
+│                       ┌─────────────┐                               │
+│                       │    GORM     │                               │
+│                       │  Database   │                               │
+│                       └─────────────┘                               │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+**gormcngen** 作为**代码生成引擎**，连接您的模型与类型安全基础层。
 
 ## 安装
 
@@ -16,157 +94,323 @@
 go get github.com/yyle88/gormcngen
 ```
 
-## 示例使用
+## 快速开始
 
-### 1. 首先定义模型
-
-假设你有如下模型：
+### 1. 定义您的 GORM 模型
 
 ```go
-type Example struct {
-	Name string `gorm:"primary_key;type:varchar(100);"`
-	Type string `gorm:"column:type;"`
-	Rank int    `gorm:"column:rank;"`
+type User struct {
+    ID       uint   `gorm:"primaryKey"`
+    Username string `gorm:"uniqueIndex;size:100"`
+    Email    string `gorm:"index;size:255"`
+    Age      int    `gorm:"check:age >= 0"`
+    IsActive bool   `gorm:"default:true"`
 }
 ```
 
-### 2. 自动生成 `Columns()` 方法
-
-使用 `gormcngen`，它会自动为你的模型生成 `Columns()` 方法：
+### 2. 生成类型安全列
 
 ```go
-func (*Example) Columns() *ExampleColumns {
-	return &ExampleColumns{
-		Name: "name",
-		Type: "type",
-		Rank: "rank",
-	}
-}
+package main
 
-type ExampleColumns struct {
-	Name gormcnm.ColumnName[string]
-	Type gormcnm.ColumnName[string]
-	Rank gormcnm.ColumnName[int]
+import (
+    "github.com/yyle88/gormcngen"
+)
+
+func main() {
+    // 配置生成选项
+    models := []interface{}{&User{}}
+    options := gormcngen.NewOptions()
+    outputPath := "user_columns_gen.go"
+    
+    // 生成代码
+    configs := gormcngen.NewConfigs(models, options, outputPath)
+    configs.Gen()
 }
 ```
 
-### 3. 使用生成的 `Columns()` 进行查询
-
-你现在可以轻松地使用生成的 `Columns()` 方法来构建查询：
+### 3. 生成的代码（自动化！）
 
 ```go
-var res Example
-var cls = res.Columns()
+// AUTO-GENERATED - DO NOT EDIT
+// Generated by gormcngen
 
-if err := db.Where(cls.Name.Eq("abc")).
-    Where(cls.Type.Eq("xyz")).
-    Where(cls.Rank.Gt(100)).
-    Where(cls.Rank.Lt(200)).
-    First(&res).Error; err != nil {
-    panic(errors.WithMessage(err, "wrong"))
+type UserColumns struct {
+    gormcnm.ColumnOperationClass
+    // 模型各列的列名和类型
+    ID       gormcnm.ColumnName[uint]
+    Username gormcnm.ColumnName[string]
+    Email    gormcnm.ColumnName[string]
+    Age      gormcnm.ColumnName[int]
+    IsActive gormcnm.ColumnName[bool]
 }
 
-fmt.Println(res)
-```
-
-### 4. 自定义列名示例（如使用中文）
-
-如果你的模型包含自定义的列名（例如使用中文），它的使用方法是一样的：
-
-```go
-type Demo struct {
-	gorm.Model
-	Name string `gorm:"type:varchar(100);" cnm:"V名称"`
-	Type string `gorm:"type:varchar(100);" cnm:"V类型"`
+func (*User) Columns() *UserColumns {
+    return &UserColumns{
+        ID:       "id",
+        Username: "username",
+        Email:    "email",
+        Age:      "age",
+        IsActive: "is_active",
+    }
 }
 ```
 
-生成的代码：
+### 4. 使用类型安全查询
 
 ```go
-func (*Demo) Columns() *DemoColumns {
-	return &DemoColumns{
-		ID:        "id",
-		CreatedAt: "created_at",
-		UpdatedAt: "updated_at",
-		DeletedAt: "deleted_at",
-		V名称:      "name",
-		V类型:      "type",
-	}
-}
+var user User
+cls := user.Columns()
 
-type DemoColumns struct {
-	ID        gormcnm.ColumnName[uint]
-	CreatedAt gormcnm.ColumnName[time.Time]
-	UpdatedAt gormcnm.ColumnName[time.Time]
-	DeletedAt gormcnm.ColumnName[gorm.DeletedAt]
-	V名称      gormcnm.ColumnName[string]
-	V类型      gormcnm.ColumnName[string]
+// 完美的类型安全，零样板代码
+err := db.Where(cls.Username.Eq("alice")).
+         Where(cls.Age.Gte(18)).
+         Where(cls.IsActive.Eq(true)).
+         First(&user).Error
+```
+
+### 高级用法
+
+```go
+// 基础配置（匹配内部示例）
+options := gormcngen.NewOptions().
+    WithColumnClassExportable(true).           // 生成导出的 ExampleColumns 结构体
+    WithEmbedColumnOperations(false)           // 不嵌入操作方法
+
+// 中文字段名支持
+chineseOptions := gormcngen.NewOptions().
+    WithUseTagName(true).                      // 使用 cnm 标签值作为字段名
+    WithTagKeyName("cnm").                     // 指定 'cnm' 作为标签键
+    WithColumnClassExportable(true)
+
+// 高级功能（来自 example6）
+advancedOptions := gormcngen.NewOptions().
+    WithColumnClassExportable(true).           // 导出结构体名称
+    WithColumnsMethodRecvName("one").          // 自定义接收器名称
+    WithColumnsCheckFieldType(true).           // 类型检查（推荐）
+    WithIsGenFuncTableColumns(true)            // 生成 TableColumns 函数
+
+// 批量处理多个模型
+allModels := []interface{}{&User{}, &Product{}, &Order{}, &Customer{}}
+configs := gormcngen.NewConfigs(allModels, options, "models_gen.go")
+configs.Gen()
+```
+
+## 高级功能
+
+### 多语言字段支持
+
+```go
+type Product struct {
+    ID          uint          `gorm:"primaryKey"`
+    Name        string        `gorm:"size:255;not null" cnm:"产品名称"`
+    Price       decimal.Decimal `gorm:"type:decimal(10,2)"`
+    CategoryID  uint          `gorm:"index"`
+    CreatedAt   time.Time     `gorm:"autoCreateTime"`
+    UpdatedAt   time.Time     `gorm:"autoUpdateTime"`
 }
 ```
 
-这样，你就可以在查询时使用母语（如中文）：
+**生成结果：**
 
 ```go
-var demo Demo
-var cls = demo.Columns()
-
-if err := db.Where(cls.V名称.Eq("测试")).
-    Where(cls.V类型.Eq("类型A")).
-    First(&demo).Error; err != nil {
-    panic(errors.WithMessage(err, "wrong"))
+type ProductColumns struct {
+    gormcnm.ColumnOperationClass
+    ID        gormcnm.ColumnName[uint]
+    Name      gormcnm.ColumnName[string]      // 映射到 "name"
+    V产品名称   gormcnm.ColumnName[string]      // 中文字段别名，映射到 Name 字段
+    Price     gormcnm.ColumnName[decimal.Decimal]
+    CategoryID gormcnm.ColumnName[uint]
+    CreatedAt gormcnm.ColumnName[time.Time]
+    UpdatedAt gormcnm.ColumnName[time.Time]
 }
 
-fmt.Println(demo)
+func (*Product) Columns() *ProductColumns {
+    return &ProductColumns{
+        ID:        "id",
+        Name:      "name",
+        V产品名称:   "name",           // 中文别名指向同一列
+        Price:     "price",
+        CategoryID: "category_id",
+        CreatedAt: "created_at",
+        UpdatedAt: "updated_at",
+    }
+}
+```
+
+**使用中文字段名进行查询：**
+
+通过生成的中文字段别名，你可以使用母语编写查询语句：
+
+```go
+var product Product
+var cls = product.Columns()
+
+// 使用中文字段名查询 - 相同的数据库列，不同的 Go 字段名
+if err := db.Where(cls.V产品名称.Eq("iPhone")).
+    Where(cls.Price.Gte(5000.00)).
+    First(&product).Error; err != nil {
+    panic(errors.WithMessage(err, "未找到产品"))
+}
+
+fmt.Println("找到产品:", product.Name)
+```
+
+这让开发者可以用母语编写更易读的代码，同时保持完整的类型安全和数据库兼容性。
+
+### Go Generate 集成
+
+创建生成脚本：
+
+**scripts/generate_columns.go:**
+```go
+package main
+
+import (
+    "github.com/yyle88/gormcngen"
+    "your-project/models"
+)
+
+func main() {
+    models := []interface{}{&models.User{}}
+    options := gormcngen.NewOptions()
+    configs := gormcngen.NewConfigs(models, options, "models/user_columns_gen.go")
+    configs.Gen()
+}
+```
+
+然后在模型文件中使用：
+
+```go
+//go:generate go run scripts/generate_columns.go
+
+type User struct {
+    ID       uint   `gorm:"primaryKey"`
+    Username string `gorm:"uniqueIndex"`
+    Email    string `gorm:"index"`
+}
+```
+
+## 与 GORM 仓储模式集成
+
+```go
+// 生成的列与 gormrepo 无缝协作
+repo := gormrepo.NewRepo(gormclass.Use(&Product{}))
+
+products, total, err := repo.Repo(db).FindPageAndCount(
+    func(db *gorm.DB, cls *ProductColumns) *gorm.DB {
+        // 可以使用英文字段名
+        return db.Where(cls.Name.Like("%computer%")).
+               Where(cls.Price.Between(1000, 5000))
+        // 或使用中文别名字段访问同一列
+        // return db.Where(cls.V产品名称.Like("%电脑%")).
+        //        Where(cls.Price.Between(1000, 5000))
+    },
+    func(cls *ProductColumns) gormcnm.OrderByBottle {
+        return cls.Price.OrderByBottle("DESC")
+    },
+    &gormrepo.Pagination{Limit: 20, Offset: 0},
+)
 ```
 
 ---
 
-通过使用 `gormcngen`，你可以轻松自动生成 `Columns()` 方法，进而用任何语言编写简单的查询语句。
+**通过使用 `gormcngen`，你可以轻松自动生成 `Columns()` 方法，进而用任何语言编写简单的查询语句。**
 
 ---
 
-## 完整样例
+## 示例
 
-[完整样例](internal/demos)
+查看 [examples](internal/examples) 和 [demos](internal/demos) 目录获取：
+- 基础模型生成示例
+- 中文字段处理示例
+- 批量模型处理示例
+- 自定义配置示例
+- 真实数据库操作示例
 
-## 设计思路
+## 相比手动列定义的优势
 
-[旧版说明](internal/docs/README_OLD_DOC.zh.md)
+| 方面 | 手动定义 | GORMCNGEN |
+|------|----------|-----------|
+| **设置时间** | ⏰ 数小时手动输入 | ⚡ 编程 API 几秒钟 |
+| **准确性** | ❌ 容易拼写错误 | ✅ 100% 准确的 AST 解析 |
+| **同步性** | ❌ 需要手动更新 | ✅ 始终与模型同步 |
+| **类型安全** | 🟡 依赖手动准确性 | ✅ 完美的类型保持 |
+| **嵌入字段** | ❌ 复杂的手动处理 | ✅ 自动检测 |
+| **原生语言** | ❌ 手动标签映射 | ✅ 智能标签处理 |
+| **大型代码库** | 😫 维护噩梦 | 🚀 轻松扩展 |
+| **团队生产力** | 🐌 缓慢且易错 | ⚡ 快速可靠 |
 
----
+<!-- TEMPLATE (ZH) BEGIN: STANDARD PROJECT FOOTER -->
 
-## 许可证类型
+## 📄 许可证类型
 
-项目采用 MIT 许可证，详情请参阅 [LICENSE](LICENSE)。
-
----
-
-## 贡献新代码
-
-非常欢迎贡献代码！贡献流程：
-
-1. 在 GitHub 上 Fork 仓库 （通过网页界面操作）。
-2. 克隆Forked项目 (`git clone https://github.com/yourname/repo-name.git`)。
-3. 在克隆的项目里 (`cd repo-name`)
-4. 创建功能分支（`git checkout -b feature/xxx`）。
-5. 添加代码 (`git add .`)。
-6. 提交更改（`git commit -m "添加功能 xxx"`）。
-7. 推送分支（`git push origin feature/xxx`）。
-8. 发起 Pull Request （通过网页界面操作）。
-
-请确保测试通过并更新相关文档。
+MIT 许可证。详见 [LICENSE](LICENSE)。
 
 ---
 
-## 贡献与支持
+## 🤝 项目贡献
 
-欢迎通过提交 pull request 或报告问题来贡献此项目。
+非常欢迎贡献代码！报告 BUG、建议功能、贡献代码：
 
-如果你觉得这个包对你有帮助，请在 GitHub 上给个 ⭐，感谢支持！！！
+- 🐛 **发现问题？** 在 GitHub 上提交问题并附上重现步骤
+- 💡 **功能建议？** 创建 issue 讨论您的想法
+- 📖 **文档疑惑？** 报告问题，帮助我们改进文档
+- 🚀 **需要功能？** 分享使用场景，帮助理解需求
+- ⚡ **性能瓶颈？** 报告慢操作，帮助我们优化性能
+- 🔧 **配置困扰？** 询问复杂设置的相关问题
+- 📢 **关注进展？** 关注仓库以获取新版本和功能
+- 🌟 **成功案例？** 分享这个包如何改善工作流程
+- 💬 **意见反馈？** 欢迎所有建议和宝贵意见
 
-**感谢你的支持！**
+---
 
-**祝编程愉快！** 🎉
+## 🔧 代码贡献
 
-Give me stars. Thank you!!!
+新代码贡献，请遵循此流程：
+
+1. **Fork**：在 GitHub 上 Fork 仓库（使用网页界面）
+2. **克隆**：克隆 Fork 的项目（`git clone https://github.com/yourname/repo-name.git`）
+3. **导航**：进入克隆的项目（`cd repo-name`）
+4. **分支**：创建功能分支（`git checkout -b feature/xxx`）
+5. **编码**：实现您的更改并编写全面的测试
+6. **测试**：（Golang 项目）确保测试通过（`go test ./...`）并遵循 Go 代码风格约定
+7. **文档**：为面向用户的更改更新文档，并使用有意义的提交消息
+8. **暂存**：暂存更改（`git add .`）
+9. **提交**：提交更改（`git commit -m "Add feature xxx"`）确保向后兼容的代码
+10. **推送**：推送到分支（`git push origin feature/xxx`）
+11. **PR**：在 GitHub 上打开 Pull Request（在 GitHub 网页上）并提供详细描述
+
+请确保测试通过并包含相关的文档更新。
+
+---
+
+## 🌟 项目支持
+
+非常欢迎通过提交 Pull Request 和报告问题来为此项目做出贡献。
+
+**项目支持：**
+
+- ⭐ **给予星标**如果项目对您有帮助
+- 🤝 **分享项目**给团队成员和（golang）编程朋友
+- 📝 **撰写博客**关于开发工具和工作流程 - 我们提供写作支持
+- 🌟 **加入生态** - 致力于支持开源和（golang）开发场景
+
+**使用这个包快乐编程！** 🎉
+
+<!-- TEMPLATE (ZH) END: STANDARD PROJECT FOOTER -->
+
+---
+
+## 📈 GitHub Stars
+
+[![starring](https://starchart.cc/yyle88/gormcngen.svg?variant=adaptive)](https://starchart.cc/yyle88/gormcngen)
+
+---
+
+## 🔗 相关项目
+
+- 🏗️ **[gormcnm](https://github.com/yyle88/gormcnm)** - 类型安全列基础包
+- 🤖 **[gormcngen](https://github.com/yyle88/gormcngen)** - 智能代码生成（本包）
+- 🏢 **[gormrepo](https://github.com/yyle88/gormrepo)** - 企业仓储模式
+- 🌍 **[gormmom](https://github.com/yyle88/gormmom)** - 原生语言编程支持

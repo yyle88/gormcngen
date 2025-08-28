@@ -1,3 +1,12 @@
+// Package gormcngen: Intelligent GORM code generation engine with AST-level precision
+// Auto generates type-safe column structs and Columns() methods from GORM models
+// Supports complex scenarios including embedded fields, custom tags, and native language columns
+// Provides intelligent code injection and incremental updates for zero-maintenance workflows
+//
+// gormcngen: 智能 GORM 代码生成引擎，具备 AST 级别精度
+// 从 GORM 模型自动生成类型安全的列结构体和 Columns() 方法
+// 支持嵌入字段、自定义标签和原生语言列等复杂场景
+// 提供智能代码注入和增量更新，实现零维护工作流
 package gormcngen
 
 import (
@@ -20,16 +29,26 @@ import (
 	"golang.org/x/exp/maps"
 )
 
-// CodeGenerationConfig defines the configuration of code generation.
-// CodeGenerationConfig 是代码生成的配置
+// CodeGenerationConfig defines the configuration for intelligent code generation
+// Contains schema configurations and output paths for AST-based code generation
+// Manages the entire code generation workflow from analysis to output
+//
+// CodeGenerationConfig 定义智能代码生成的配置
+// 包含基于 AST 代码生成的 schema 配置和输出路径
+// 管理从分析到输出的整个代码生成工作流
 type CodeGenerationConfig struct {
-	schemas          []*SchemaConfig // Configurations of the model pkg struct schemas. // 自定义模型的 Schema 配置
-	methodOutputPath string          // Path where the generated methods will be saved. // 已生成的方法代码保存路径
-	structOutputPath string          // Path where the generated struct code be saved. // 已生成的结构体代码保存路径
+	schemas          []*SchemaConfig // Model schema configurations for code generation // 用于代码生成的模型 schema 配置
+	methodOutputPath string          // Output path for generated method code // 生成方法代码的输出路径
+	structOutputPath string          // Output path for generated struct code // 生成结构体代码的输出路径
 }
 
-// NewCodeGenerationConfig creates a new instance of CodeGenerationConfig.
+// NewCodeGenerationConfig creates a new instance of CodeGenerationConfig
+// Initializes configuration with provided schema definitions for code generation
+// Returns a configured instance ready for method and struct path specification
+//
 // NewCodeGenerationConfig 创建一个新的 CodeGenerationConfig 实例
+// 使用提供的 schema 定义初始化代码生成配置
+// 返回一个已配置的实例，准备进行方法和结构体路径指定
 func NewCodeGenerationConfig(schemas []*SchemaConfig) *CodeGenerationConfig {
 	return &CodeGenerationConfig{
 		schemas:          schemas,
@@ -54,28 +73,50 @@ func NewConfigs(models []interface{}, options *Options, outputPath string) *Conf
 		WithStructOutputPath(outputPath)
 }
 
-// WithMethodOutputPath specifies the output path for method code.
-// WithMethodOutputPath 设置方法代码的输出路径
+// WithMethodOutputPath specifies the output path for generated method code
+// Configures where Columns() methods will be written during code generation
+// Returns the configuration instance for method chaining
+//
+// WithMethodOutputPath 指定生成方法代码的输出路径
+// 配置 Columns() 方法在代码生成过程中的写入位置
+// 返回配置实例以支持方法链式调用
 func (cfg *Configs) WithMethodOutputPath(path string) *Configs {
 	cfg.methodOutputPath = path
 	return cfg
 }
 
-// WithStructOutputPath specifies the output path for struct code.
-// WithStructOutputPath 设置结构体代码的输出路径
+// WithStructOutputPath specifies the output path for generated struct code
+// Configures where column struct definitions will be written during code generation
+// Returns the configuration instance for method chaining
+//
+// WithStructOutputPath 指定生成结构体代码的输出路径
+// 配置列结构体定义在代码生成过程中的写入位置
+// 返回配置实例以支持方法链式调用
 func (cfg *Configs) WithStructOutputPath(path string) *Configs {
 	cfg.structOutputPath = path
 	return cfg
 }
 
-// Generate triggers the code generation process by calling the Gen method.
-// Generate 通过调用 Gen 方法触发代码生成过程
+// Generate triggers the intelligent code generation process
+// Executes the complete AST-based code generation workflow
+// Convenience method that internally calls Gen() for better API ergonomics
+//
+// Generate 触发智能代码生成过程
+// 执行完整的基于 AST 的代码生成工作流
+// 便利方法，内部调用 Gen() 以提供更好的 API 人机工学
 func (cfg *Configs) Generate() {
 	cfg.Gen()
 }
 
-// Gen is the core method responsible for generating code based on the provided schemas.
-// Gen 是核心方法，负责根据提供的 schemas 生成代码
+// Gen is the core AST-powered code generation engine
+// Analyzes provided schemas and generates type-safe column structs and methods
+// Handles complex scenarios including existing code detection, incremental updates, and intelligent merging
+// Uses sophisticated AST manipulation to ensure precise code injection without breaking existing logic
+//
+// Gen 是核心的 AST 驱动代码生成引擎
+// 分析提供的 schema 并生成类型安全的列结构体和方法
+// 处理包括现有代码检测、增量更新和智能合并在内的复杂场景
+// 使用精巧的 AST 操作确保精准的代码注入，不破坏现有逻辑
 func (cfg *Configs) Gen() {
 	// Define the elementType struct to store information about code blocks that need editing. // 定义 elementType 结构体，用于存储需要编辑的代码块信息
 	type elementType struct {
