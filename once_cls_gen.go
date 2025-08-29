@@ -23,6 +23,7 @@ import (
 	"github.com/yyle88/tern"
 	"github.com/yyle88/tern/zerotern"
 	"github.com/yyle88/zaplog"
+	"go.uber.org/zap"
 	"gorm.io/gorm/schema"
 )
 
@@ -58,6 +59,8 @@ func NewSchemaConfig(object interface{}, options *Options) *SchemaConfig {
 
 	ShowSchemaEnglish(sch)
 	ShowSchemaChinese(sch)
+	ShowSchemaRelationshipsEnglish(sch)
+	ShowSchemaRelationshipsChinese(sch)
 
 	namingConfig := NewNamingConfig(sch, options)
 
@@ -168,9 +171,38 @@ func (c *Config) Gen() *GenOutput {
 		methodTableColumnsPtx.Println(fmt.Sprintf("	panic(\"METHOD %s.%s IS NOT IMPLEMENTED\")", c.structName, c.methodNameTableColumns))
 	}
 	for _, field := range c.sch.Fields {
+		zaplog.LOG.Debug("processing field column mapping",
+			zap.String("name", field.Name),
+			zap.String("type", field.FieldType.String()),
+			zap.String("dbName", field.DBName),
+			zap.String("tag", string(field.Tag)))
+
+		// Skip fields that don't have corresponding database columns (e.g., association fields)
+		// 跳过没有对应数据库列的字段（如关联字段等）
+		if field.DBName == "" {
+			zaplog.LOG.Debug("skipping field without db-name",
+				zap.String("name", field.Name),
+				zap.String("reason", "without DBName"))
+			continue
+		}
+
 		var columnGoTypeName string
-		if pkgPath := field.FieldType.PkgPath(); pkgPath == c.sch.ModelType.PkgPath() { // 如果在同一个包里，仅使用类型名
-			columnGoTypeName = field.FieldType.Name()
+		// Get the underlying type for pointer types to check package
+		// 获取指针类型的底层类型来检查包
+		underlyingType := tern.BFF(field.FieldType.Kind() == reflect.Ptr, func() reflect.Type {
+			return field.FieldType.Elem()
+		}, func() reflect.Type {
+			return field.FieldType
+		})
+
+		if pkgPath := underlyingType.PkgPath(); pkgPath == c.sch.ModelType.PkgPath() { // 如果在同一个包里
+			// For same package types, use simple name (Profile or *Profile)
+			// 对于同包类型，使用简单名称（Profile 或 *Profile）
+			if field.FieldType.Kind() == reflect.Ptr {
+				columnGoTypeName = "*" + underlyingType.Name()
+			} else {
+				columnGoTypeName = field.FieldType.Name()
+			}
 		} else {
 			if pkgPath != "" {
 				pkgImports[pkgPath] = true
@@ -283,6 +315,66 @@ func ShowSchemaChinese(sch *schema.Schema) {
 			"DB类型:", field.DataType, //数据库中的数据类型
 			" | ",
 			"Go标签:", field.Tag,
+		)
+	}
+	fmt.Println("}")
+	fmt.Println("---")
+}
+
+// ShowSchemaRelationshipsEnglish displays relationship information for educational and debugging purposes
+// ShowSchemaRelationshipsEnglish 显示关系信息，用于教学和调试目的
+func ShowSchemaRelationshipsEnglish(sch *schema.Schema) {
+	if len(sch.Relationships.Relations) == 0 {
+		return
+	}
+
+	fmt.Println("---")
+	fmt.Println("relationships_message", "Struct name:", sch.Name, "Table name:", sch.Table, "Relationships: {")
+	for _, relation := range sch.Relationships.Relations {
+		fmt.Println("   ",
+			"Association:", relation.Name,
+			" | ",
+			"Type:", relation.Type,
+			" | ",
+			"Target:", relation.FieldSchema.Name,
+			" | ",
+			"FK Columns:", tern.BVF(len(relation.References) == 0, "[]", func() string {
+				var columns []string
+				for _, ref := range relation.References {
+					columns = append(columns, ref.ForeignKey.DBName)
+				}
+				return "[" + strings.Join(columns, ",") + "]"
+			}),
+		)
+	}
+	fmt.Println("}")
+	fmt.Println("---")
+}
+
+// ShowSchemaRelationshipsChinese displays relationship information in Chinese for educational and debugging purposes
+// ShowSchemaRelationshipsChinese 用中文显示关系信息，用于教学和调试目的
+func ShowSchemaRelationshipsChinese(sch *schema.Schema) {
+	if len(sch.Relationships.Relations) == 0 {
+		return
+	}
+
+	fmt.Println("---")
+	fmt.Println("relationships_message", "结构体名称:", sch.Name, "表名:", sch.Table, "关联关系: {")
+	for _, relation := range sch.Relationships.Relations {
+		fmt.Println("   ",
+			"关联字段:", relation.Name,
+			" | ",
+			"关系类型:", relation.Type,
+			" | ",
+			"目标模型:", relation.FieldSchema.Name,
+			" | ",
+			"外键列名:", tern.BVF(len(relation.References) == 0, "[]", func() string {
+				var columns []string
+				for _, ref := range relation.References {
+					columns = append(columns, ref.ForeignKey.DBName)
+				}
+				return "[" + strings.Join(columns, ",") + "]"
+			}),
 		)
 	}
 	fmt.Println("}")

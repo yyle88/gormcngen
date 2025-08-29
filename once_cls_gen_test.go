@@ -64,6 +64,29 @@ func TestGen_ExcludeUntaggedFields(t *testing.T) {
 	t.Log(neatjsons.S(output.GetPkgImports()))
 }
 
+func TestGen_ForeignKeyAssociation(t *testing.T) {
+	type Profile struct {
+		ID     uint
+		Bio    string
+		UserID uint // 外键
+	}
+
+	type Example struct {
+		ID      uint
+		Name    string
+		Profile Profile `gorm:"foreignKey:UserID"`
+	}
+
+	options := gormcngen.NewOptions().
+		WithUseTagName(true)
+
+	config := gormcngen.NewSchemaConfig(&Example{}, options)
+	output := config.Gen()
+	t.Log(output.GetMethodCode())
+	t.Log(output.GetStructCode())
+	t.Log(neatjsons.S(output.GetPkgImports()))
+}
+
 func TestGen_ColumnsMethodRecvName(t *testing.T) {
 	type Example struct {
 		ID        int32     `gorm:"column:id;primaryKey;autoIncrement:true" json:"id"`
