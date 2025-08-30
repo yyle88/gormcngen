@@ -14,6 +14,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/yyle88/done"
 	"github.com/yyle88/gormcngen/internal/demos/demo1/internal/models"
+	"github.com/yyle88/rese"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -22,9 +23,9 @@ import (
 func main() {
 	//new db connection
 	dsn := fmt.Sprintf("file:db-%s?mode=memory&cache=shared", uuid.New().String())
-	db := done.VCE(gorm.Open(sqlite.Open(dsn), &gorm.Config{
+	db := rese.P1(gorm.Open(sqlite.Open(dsn), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Info),
-	})).Nice()
+	}))
 
 	//create example data
 	_ = db.AutoMigrate(&models.Example{})

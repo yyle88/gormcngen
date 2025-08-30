@@ -6,14 +6,14 @@ import (
 	"github.com/yyle88/gormcnm"
 )
 
-func (c *Person) Columns() *PersonColumns {
+func (one *Person) Columns() *PersonColumns {
 	return &PersonColumns{
-		ID:        gormcnm.Cnm(c.ID, "id"),
-		Name:      gormcnm.Cnm(c.Name, "name"),
-		BirthDate: gormcnm.Cnm(c.BirthDate, "birth_date"),
-		Gender:    gormcnm.Cnm(c.Gender, "gender"),
-		CreatedAt: gormcnm.Cnm(c.CreatedAt, "created_at"),
-		UpdatedAt: gormcnm.Cnm(c.UpdatedAt, "updated_at"),
+		ID:        gormcnm.Cnm(one.ID, "id"),
+		Name:      gormcnm.Cnm(one.Name, "name"),
+		BirthDate: gormcnm.Cnm(one.BirthDate, "birth_date"),
+		Gender:    gormcnm.Cnm(one.Gender, "gender"),
+		CreatedAt: gormcnm.Cnm(one.CreatedAt, "created_at"),
+		UpdatedAt: gormcnm.Cnm(one.UpdatedAt, "updated_at"),
 	}
 }
 
@@ -29,12 +29,12 @@ type PersonColumns struct {
 	UpdatedAt gormcnm.ColumnName[time.Time]
 }
 
-func (c *Example) Columns() *ExampleColumns {
+func (one *Example) Columns() *ExampleColumns {
 	return &ExampleColumns{
-		ID:        gormcnm.Cnm(c.ID, "id"),
-		Name:      gormcnm.Cnm(c.Name, "name"),
-		CreatedAt: gormcnm.Cnm(c.CreatedAt, "created_at"),
-		UpdatedAt: gormcnm.Cnm(c.UpdatedAt, "updated_at"),
+		ID:        gormcnm.Cnm(one.ID, "id"),
+		Name:      gormcnm.Cnm(one.Name, "name"),
+		CreatedAt: gormcnm.Cnm(one.CreatedAt, "created_at"),
+		UpdatedAt: gormcnm.Cnm(one.UpdatedAt, "updated_at"),
 	}
 }
 

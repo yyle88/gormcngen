@@ -13,7 +13,7 @@ func TestGenerate(t *testing.T) {
 	t.Log(absPath)
 
 	options := gormcngen.NewOptions().
-		WithColumnClassExportable(true). //中间类型名称的样式为可导出的 ExampleColumns
+		WithColumnClassExportable(true). //中间类型名称的样式为可导出的 UserColumns
 		WithEmbedColumnOperations(true). //其实没啥用
 		WithUseTagName(true).
 		WithTagKeyName("cnm").

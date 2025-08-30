@@ -6,16 +6,16 @@ import (
 	"github.com/yyle88/gormcnm"
 )
 
-func (*Example) Columns() *ExampleColumns {
+func (c *Example) Columns() *ExampleColumns {
 	return &ExampleColumns{
-		ID:        "id",
-		Name:      "name",
-		Create:    "create",
-		Select:    "select",
-		Update:    "update",
-		Delete:    "delete",
-		CreatedAt: "created_at",
-		UpdatedAt: "updated_at",
+		ID:        gormcnm.Cnm(c.ID, "id"),
+		Name:      gormcnm.Cnm(c.Name, "name"),
+		Create:    gormcnm.Cnm(c.Create, "create"),
+		Select:    gormcnm.Cnm(c.Select, "select"),
+		Update:    gormcnm.Cnm(c.Update, "update"),
+		Delete:    gormcnm.Cnm(c.Delete, "delete"),
+		CreatedAt: gormcnm.Cnm(c.CreatedAt, "created_at"),
+		UpdatedAt: gormcnm.Cnm(c.UpdatedAt, "updated_at"),
 	}
 }
 

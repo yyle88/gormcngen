@@ -10,6 +10,7 @@ import (
 	"github.com/yyle88/done"
 	"github.com/yyle88/gormcngen/internal/examples/example3/internal/models"
 	"github.com/yyle88/neatjson/neatjsons"
+	"github.com/yyle88/rese"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -26,12 +27,10 @@ var caseDB *gorm.DB
 // 创建带有 SQL 保留字字段名的测试数据
 func TestMain(m *testing.M) {
 	dsn := fmt.Sprintf("file:db-%s?mode=memory&cache=shared", uuid.New().String())
-	db := done.VCE(gorm.Open(sqlite.Open(dsn), &gorm.Config{
+	db := rese.P1(gorm.Open(sqlite.Open(dsn), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Info),
-	})).Nice()
-	defer func() {
-		done.Done(done.VCE(db.DB()).Nice().Close())
-	}()
+	}))
+	defer rese.F0(rese.P1(db.DB()).Close)
 
 	done.Done(db.AutoMigrate(&models.Example{}))
 	done.Done(db.Save(&models.Example{

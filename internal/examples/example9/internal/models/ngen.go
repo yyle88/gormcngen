@@ -2,10 +2,10 @@ package models
 
 import "github.com/yyle88/gormcnm"
 
-func (*User) Columns() *UserColumns {
+func (c *User) Columns() *UserColumns {
 	return &UserColumns{
-		ID:   "id",
-		Name: "name",
+		ID:   gormcnm.Cnm(c.ID, "id"),
+		Name: gormcnm.Cnm(c.Name, "name"),
 	}
 }
 
@@ -17,11 +17,11 @@ type UserColumns struct {
 	Name gormcnm.ColumnName[string]
 }
 
-func (*Profile) Columns() *ProfileColumns {
+func (c *Profile) Columns() *ProfileColumns {
 	return &ProfileColumns{
-		ID:     "id",
-		Bio:    "bio",
-		UserID: "user_id",
+		ID:     gormcnm.Cnm(c.ID, "id"),
+		Bio:    gormcnm.Cnm(c.Bio, "bio"),
+		UserID: gormcnm.Cnm(c.UserID, "user_id"),
 	}
 }
 

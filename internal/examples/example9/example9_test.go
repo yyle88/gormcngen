@@ -27,9 +27,9 @@ var caseDB *gorm.DB
 // 创建测试数据来测试关联字段处理和关系查询
 func TestMain(m *testing.M) {
 	dsn := fmt.Sprintf("file:db-%s?mode=memory&cache=shared", uuid.New().String())
-	db := done.VCE(gorm.Open(sqlite.Open(dsn), &gorm.Config{
+	db := rese.P1(gorm.Open(sqlite.Open(dsn), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Info),
-	})).Nice()
+	}))
 	defer rese.F0(rese.P1(db.DB()).Close)
 
 	// Auto migrate both models with their association relationship

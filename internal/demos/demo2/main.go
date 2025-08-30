@@ -4,12 +4,12 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
-	"github.com/yyle88/done"
 	"github.com/yyle88/gormcngen/internal/demos/demo2/internal/models"
 	"github.com/yyle88/gormcnm"
 	"github.com/yyle88/gormcnm/gormcnmstub"
 	"github.com/yyle88/must"
 	"github.com/yyle88/neatjson/neatjsons"
+	"github.com/yyle88/rese"
 	"github.com/yyle88/zaplog"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -19,9 +19,9 @@ import (
 func main() {
 	//new db connection
 	dsn := fmt.Sprintf("file:db-%s?mode=memory&cache=shared", uuid.New().String())
-	db := done.VCE(gorm.Open(sqlite.Open(dsn), &gorm.Config{
+	db := rese.P1(gorm.Open(sqlite.Open(dsn), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Info),
-	})).Nice()
+	}))
 
 	//create example data
 	must.Done(db.AutoMigrate(&models.User{}))

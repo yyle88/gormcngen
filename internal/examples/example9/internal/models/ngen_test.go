@@ -13,8 +13,9 @@ func TestGenerate(t *testing.T) {
 	t.Log(absPath)
 
 	options := gormcngen.NewOptions().
-		WithColumnClassExportable(true). //中间类型名称的样式为可导出的 ExampleColumns
-		//WithColumnsCheckFieldType(true).
+		WithColumnClassExportable(true). //中间类型名称的样式为可导出的 UserColumns
+		WithColumnsMethodRecvName("c").  //设置列方法的接收器名称
+		WithColumnsCheckFieldType(true). //这是新特性，非常建议启用
 		WithUseTagName(true)
 
 	cfg := gormcngen.NewConfigs([]interface{}{

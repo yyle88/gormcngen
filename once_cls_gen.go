@@ -14,12 +14,12 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/yyle88/done"
 	"github.com/yyle88/erero"
 	"github.com/yyle88/gormcngen/internal/utils"
 	"github.com/yyle88/gormcnm"
 	"github.com/yyle88/must"
 	"github.com/yyle88/neatjson/neatjsons"
+	"github.com/yyle88/rese"
 	"github.com/yyle88/tern"
 	"github.com/yyle88/tern/zerotern"
 	"github.com/yyle88/zaplog"
@@ -52,10 +52,10 @@ type SchemaConfig struct {
 // 初始化 schema 分析，显示调试信息，并配置生成参数
 // 返回一个完全配置的 SchemaConfig，准备进行代码生成
 func NewSchemaConfig(object interface{}, options *Options) *SchemaConfig {
-	sch := done.VCE(schema.Parse(object, &sync.Map{}, &schema.NamingStrategy{
+	sch := rese.P1(schema.Parse(object, &sync.Map{}, &schema.NamingStrategy{
 		SingularTable: false, //这是gorm默认的
 		NoLowerCase:   false, //这是gorm默认的
-	})).Nice()
+	}))
 
 	ShowSchemaEnglish(sch)
 	ShowSchemaChinese(sch)

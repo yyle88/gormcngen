@@ -2,13 +2,13 @@ package models
 
 import "github.com/yyle88/gormcnm"
 
-func (*Student) Columns() *StudentColumns {
+func (c *Student) Columns() *StudentColumns {
 	return &StudentColumns{
-		V班级编码: "class_code",
-		V学号:   "num",
-		V名字:   "name",
-		V性别:   "sex",
-		V生日:   "age",
+		V班级编码: gormcnm.Cnm(c.ClassCode, "class_code"),
+		V学号:   gormcnm.Cnm(c.Num, "num"),
+		V名字:   gormcnm.Cnm(c.Name, "name"),
+		V性别:   gormcnm.Cnm(c.Sex, "sex"),
+		V生日:   gormcnm.Cnm(c.BornDate, "age"),
 	}
 }
 
@@ -23,11 +23,11 @@ type StudentColumns struct {
 	V生日   gormcnm.ColumnName[string]
 }
 
-func (*Class) Columns() *ClassColumns {
+func (c *Class) Columns() *ClassColumns {
 	return &ClassColumns{
-		V班级编码: "class_code",
-		V班级名称: "class_name",
-		V班主任名: "main_teacher_name",
+		V班级编码: gormcnm.Cnm(c.V班级编码, "class_code"),
+		V班级名称: gormcnm.Cnm(c.V班级名称, "class_name"),
+		V班主任名: gormcnm.Cnm(c.V班主任名, "main_teacher_name"),
 	}
 }
 
