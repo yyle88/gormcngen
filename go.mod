@@ -3,7 +3,7 @@ module github.com/yyle88/gormcngen
 go 1.22.8
 
 require (
-	github.com/brianvoe/gofakeit/v7 v7.5.0
+	github.com/brianvoe/gofakeit/v7 v7.6.0
 	github.com/google/uuid v1.6.0
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.11.1
@@ -16,8 +16,8 @@ require (
 	github.com/yyle88/osexistpath v0.0.17
 	github.com/yyle88/printgo v1.0.5
 	github.com/yyle88/rese v0.0.11
-	github.com/yyle88/runpath v1.0.23
-	github.com/yyle88/sortslice v1.0.8
+	github.com/yyle88/runpath v1.0.24
+	github.com/yyle88/sortx v1.0.10
 	github.com/yyle88/syntaxgo v0.0.53
 	github.com/yyle88/tern v0.0.8
 	github.com/yyle88/zaplog v0.0.26

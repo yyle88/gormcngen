@@ -1,6 +1,6 @@
 // Package utils: Print utilities for gormcngen debugging and output
 // Provides convenient printing functions for development and testing
-// Wraps printgo functionality with gormcngen-specific configurations
+// Wraps printgo functions with gormcngen-specific configurations
 //
 // utils: gormcngen 调试和输出的打印工具
 // 为开发和测试提供便利的打印函数

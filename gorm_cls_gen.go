@@ -1,9 +1,9 @@
-// Package gormcngen: Intelligent GORM code generation engine with AST-level precision
+// Package gormcngen: Intelligent GORM code generation engine with AST-grade precision
 // Auto generates type-safe column structs and Columns() methods from GORM models
 // Supports complex scenarios including embedded fields, custom tags, and native language columns
 // Provides intelligent code injection and incremental updates for zero-maintenance workflows
 //
-// gormcngen: 智能 GORM 代码生成引擎，具备 AST 级别精度
+// gormcngen: 智能 GORM 代码生成引擎，具备 AST 级精度
 // 从 GORM 模型自动生成类型安全的列结构体和 Columns() 方法
 // 支持嵌入字段、自定义标签和原生语言列等复杂场景
 // 提供智能代码注入和增量更新，实现零维护工作流
@@ -13,14 +13,16 @@ import (
 	"go/ast"
 	"go/token"
 	"os"
+	"strings"
 	"sync/atomic"
 
 	"github.com/yyle88/done"
 	"github.com/yyle88/formatgo"
 	"github.com/yyle88/gormcngen/internal/utils"
 	"github.com/yyle88/gormcnm"
+	"github.com/yyle88/must/mustnum"
 	"github.com/yyle88/rese"
-	"github.com/yyle88/sortslice"
+	"github.com/yyle88/sortx"
 	"github.com/yyle88/syntaxgo/syntaxgo_ast"
 	"github.com/yyle88/syntaxgo/syntaxgo_astnode"
 	"github.com/yyle88/syntaxgo/syntaxgo_search"
@@ -37,14 +39,16 @@ import (
 // 包含基于 AST 代码生成的 schema 配置和输出路径
 // 管理从分析到输出的整个代码生成工作流
 type CodeGenerationConfig struct {
-	schemas          []*SchemaConfig // Model schema configurations for code generation // 用于代码生成的模型 schema 配置
+	schemas          []*SchemaConfig // Schema configurations for code generation // 用于代码生成的 schema 配置
 	methodOutputPath string          // Output path for generated method code // 生成方法代码的输出路径
 	structOutputPath string          // Output path for generated struct code // 生成结构体代码的输出路径
+	isGenPreventEdit bool            // Generate "DO NOT EDIT" comment headers // 是否生成"请勿编辑"注释头部
+	generatedFromPos string          // Position where code generation was triggered // 代码生成的触发位置
 }
 
 // NewCodeGenerationConfig creates a new instance of CodeGenerationConfig
 // Initializes configuration with provided schema definitions for code generation
-// Returns a configured instance ready for method and struct path specification
+// Returns a configured instance prepared for method and struct path specification
 //
 // NewCodeGenerationConfig 创建一个新的 CodeGenerationConfig 实例
 // 使用提供的 schema 定义初始化代码生成配置
@@ -54,6 +58,8 @@ func NewCodeGenerationConfig(schemas []*SchemaConfig) *CodeGenerationConfig {
 		schemas:          schemas,
 		methodOutputPath: "",
 		structOutputPath: "",
+		isGenPreventEdit: true,                 // Default true to add DO NOT EDIT comment // 默认为 true，添加请勿编辑注释
+		generatedFromPos: GetGenPosFuncMark(2), // Auto capture position for code references // 自动捕获位置以便代码引用
 	}
 }
 
@@ -74,7 +80,7 @@ func NewConfigs(models []interface{}, options *Options, outputPath string) *Conf
 }
 
 // WithMethodOutputPath specifies the output path for generated method code
-// Configures where Columns() methods will be written during code generation
+// Configures where Columns() methods are written during code generation
 // Returns the configuration instance for method chaining
 //
 // WithMethodOutputPath 指定生成方法代码的输出路径
@@ -86,7 +92,7 @@ func (cfg *Configs) WithMethodOutputPath(path string) *Configs {
 }
 
 // WithStructOutputPath specifies the output path for generated struct code
-// Configures where column struct definitions will be written during code generation
+// Configures where column struct definitions are written during code generation
 // Returns the configuration instance for method chaining
 //
 // WithStructOutputPath 指定生成结构体代码的输出路径
@@ -97,13 +103,39 @@ func (cfg *Configs) WithStructOutputPath(path string) *Configs {
 	return cfg
 }
 
+// WithIsGenPreventEdit controls adding "DO NOT EDIT" comment headers
+// When enabled, adds warning comments to prevent editing of generated files
+// Set to false if you want clean generated code without warning headers
+//
+// WithIsGenPreventEdit 控制是否添加"请勿编辑"注释头部
+// 启用时，添加警告注释以防止手动编辑生成的文件
+// 如果你想要干净的生成代码而不带警告头部，设置为 false
+func (cfg *Configs) WithIsGenPreventEdit(isGenPreventEdit bool) *Configs {
+	cfg.isGenPreventEdit = isGenPreventEdit
+	return cfg
+}
+
+// WithGeneratedFromPos sets custom source location info for generated files
+// Pass empty string to disable source location info
+// Pass non-empty string to show custom location info in generated file headers
+// Use GetGenPosFuncMark() function to auto get current position
+//
+// WithGeneratedFromPos 为生成文件设置自定义源位置信息
+// 传入空字符串禁用源位置显示
+// 传入非空字符串在生成文件头部显示自定义位置信息
+// 使用 GetGenPosFuncMark() 函数自动获取当前位置
+func (cfg *Configs) WithGeneratedFromPos(generatedFromPos string) *Configs {
+	cfg.generatedFromPos = generatedFromPos
+	return cfg
+}
+
 // Generate triggers the intelligent code generation process
 // Executes the complete AST-based code generation workflow
-// Convenience method that internally calls Gen() for better API ergonomics
+// Convenience method that calls Gen() for enhanced API ergonomics
 //
 // Generate 触发智能代码生成过程
 // 执行完整的基于 AST 的代码生成工作流
-// 便利方法，内部调用 Gen() 以提供更好的 API 人机工学
+// 便利方法，调用 Gen() 以提供更好的 API 人机工学
 func (cfg *Configs) Generate() {
 	cfg.Gen()
 }
@@ -122,7 +154,7 @@ func (cfg *Configs) Gen() {
 	type elementType struct {
 		sourcePath     string          // Path to the source file containing the code block // 源文件路径
 		astNode        ast.Node        // AST node representing the code block // 代码块对应的 AST 节点
-		exist          bool            // Flag indicating whether the code block already exists // 标志位，指示代码块是否已存在
+		exist          bool            // Flag indicating code block existence // 标志位，指示代码块是否已存在
 		newSourceBlock string          // The new content of the code block to be inserted // 新代码块内容
 		pkgImports     map[string]bool // Set of new import statements to be added // 需要添加的导入包集合
 	}
@@ -130,7 +162,7 @@ func (cfg *Configs) Gen() {
 	// determine the position-sequence of new code blocks. // 确定新增代码块的顺序位置。
 	var newCodeSequence atomic.Int64
 
-	// Create a slice to store all elements that require edits. // 创建一个切片，用于存储所有需要编辑的元素
+	// Create a slice to store elements that need edits. // 创建一个切片，用于存储所有需要编辑的元素
 	var editingElements = make([]*elementType, 0, len(cfg.schemas)*3)
 
 	// Iterate through each schema configuration to generate the corresponding code. // 遍历每个 schema 配置，生成相应的代码
@@ -147,7 +179,7 @@ func (cfg *Configs) Gen() {
 				// Locate the AST definition of the method. // 查找方法的 AST 定义
 				methodTypeDeclaration, ok := syntaxgo_search.FindFunctionByReceiverAndName(astFile, schemaConfig.sch.Name, schemaConfig.methodName)
 				if ok {
-					// If the method already exists, prepare for updating its code block. // 如果方法已存在，准备更新代码块
+					// If the method exists, prepare for updating its code block. // 如果方法已存在，准备更新代码块
 					editingElements = append(editingElements, &elementType{
 						sourcePath:     path,
 						astNode:        methodTypeDeclaration,
@@ -176,7 +208,7 @@ func (cfg *Configs) Gen() {
 				// Locate the AST definition of the method. // 查找方法的 AST 定义
 				methodTypeDeclaration, ok := syntaxgo_search.FindFunctionByReceiverAndName(astFile, schemaConfig.sch.Name, schemaConfig.methodNameTableColumns)
 				if ok {
-					// If the method already exists, prepare for updating its code block. // 如果方法已存在，准备更新代码块
+					// If the method exists, prepare for updating its code block. // 如果方法已存在，准备更新代码块
 					editingElements = append(editingElements, &elementType{
 						sourcePath:     path,
 						astNode:        methodTypeDeclaration,
@@ -203,7 +235,7 @@ func (cfg *Configs) Gen() {
 			astFile, _ := astBundle.GetBundle()
 
 			// Locate the AST definition of the struct. // 查找结构体的 AST 定义
-			// Attempt to find the struct declaration in the AST by its name.
+			// Find the struct declaration in the AST using its name.
 			structTypeDeclaration, ok := syntaxgo_search.FindStructDeclarationByName(astFile, schemaConfig.structName)
 			if !ok {
 				// If the struct declaration was not found, check if we should ignore the exportable status.
@@ -212,17 +244,17 @@ func (cfg *Configs) Gen() {
 					// If the struct name is not found, toggle the exportable statue of the struct name.
 					// 如果结构体名称未找到，则切换结构体名称的导出性（首字母大小写）
 					newStructName := utils.SwitchToggleExportable(schemaConfig.structName)
-					// If the toggled struct name is different from the original, try searching again with the new name.
-					// 如果切换后的结构体名称与原名称不同，尝试使用新名称再次查找
+					// If the toggled struct name differs from the original, search again with the new name.
+					// 如果切换后的结构体名称与原名称不同，使用新名称再次查找
 					if newStructName != schemaConfig.structName {
-						// Attempt to find the struct declaration by the new name with the toggled exportable.
-						// 尝试使用切换后的名称查找结构体声明
+						// Find the struct declaration using the new name with the toggled exportable.
+						// 使用切换后的名称查找结构体声明
 						structTypeDeclaration, ok = syntaxgo_search.FindStructDeclarationByName(astFile, newStructName)
 					}
 				}
 			}
 			if ok {
-				// If the struct already exists, prepare for updating its code block. // 如果结构体已存在，准备更新代码块
+				// If the struct exists, prepare for updating its code block. // 如果结构体已存在，准备更新代码块
 				editingElements = append(editingElements, &elementType{
 					sourcePath:     path,
 					astNode:        structTypeDeclaration,
@@ -243,8 +275,8 @@ func (cfg *Configs) Gen() {
 		}
 	}
 
-	// Sort the elements based on their existence, with existing code blocks prioritized. // 根据代码块的存在性进行排序，优先处理已存在的代码块
-	sortslice.SortVStable[*elementType](editingElements, func(a, b *elementType) bool {
+	// Sort the elements based on existence, with existing code blocks prioritized. // 根据代码块的存在性进行排序，优先处理已存在的代码块
+	sortx.SortVStable[*elementType](editingElements, func(a, b *elementType) bool {
 		if a.exist != b.exist {
 			return a.exist // Sort existing code blocks to the front // 已存在的代码块排在前面
 		} else {
@@ -256,7 +288,7 @@ func (cfg *Configs) Gen() {
 		}
 	})
 
-	// Map file paths to their corresponding source code and imports. // 将文件路径与其对应的源代码和导入包映射
+	// Map file paths to corresponding source code and imports. // 将文件路径与其对应的源代码和导入包映射
 	type sourceAndImportsTuple struct {
 		sourceCode []byte          // Source code of the go file // 源文件的完整源代码
 		pkgImports map[string]bool // Required import statements // 需要导入的包
@@ -299,9 +331,49 @@ func (cfg *Configs) Gen() {
 		tuple.sourceCode = options.InjectImports(tuple.sourceCode)
 	}
 
+	// Inject or remove generated code documentation headers based on config // 根据配置注入或移除生成代码文档头部
+	for _, tuple := range path2codeMap {
+		tuple.sourceCode = processDoNotEditComment(tuple.sourceCode, cfg.isGenPreventEdit, cfg.generatedFromPos)
+	}
+
 	// Format the updated source code and write it back to the respective files. // 格式化更新后的源代码，再写回相应的文件
 	for absPath, tuple := range path2codeMap {
 		newSource := done.VAE(formatgo.FormatBytes(tuple.sourceCode)).Nice()
 		done.Done(os.WriteFile(absPath, newSource, 0644))
+	}
+}
+
+// processDoNotEditComment adds or removes "DO NOT EDIT" comment headers based on options
+// When isGenPreventEdit is true, adds warning comments to files
+// When isGenPreventEdit is false, removes existing generated headers
+// Returns the source code with proper header processing and spacing
+//
+// processDoNotEditComment 根据选项添加或移除"请勿编辑"注释头部
+// 当 isGenPreventEdit 为 true 时，向文件添加警告注释
+// 当 isGenPreventEdit 为 false 时，移除现有的生成头部
+// 返回经过正确头部处理和间距的源代码
+func processDoNotEditComment(sourceCode []byte, isGenPreventEdit bool, generatedFromPos string) []byte {
+	const prefix = "// Code generated"
+	const suffix = "// ========== GORMCNGEN:DO-NOT-EDIT-MARKER:END =========="
+
+	notEditComment := prefix + ` ` + `using gormcngen. DO NOT EDIT.` + "\n"
+	notEditComment += `// This file was auto generated via github.com/yyle88/gormcngen` + "\n"
+	if generatedFromPos != "" {
+		notEditComment += `// Generated from: ` + generatedFromPos + "\n"
+	}
+	notEditComment += suffix + "\n\n"
+
+	newSource := string(sourceCode)
+	if strings.HasPrefix(newSource, prefix) && strings.Contains(newSource, suffix) {
+		edx := strings.Index(newSource, suffix)
+		mustnum.Positive(edx)
+		edx += len(suffix)
+		newSource = newSource[edx:]
+	}
+
+	if isGenPreventEdit {
+		return []byte(notEditComment + newSource)
+	} else {
+		return []byte(newSource)
 	}
 }

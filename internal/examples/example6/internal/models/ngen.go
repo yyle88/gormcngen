@@ -1,3 +1,8 @@
+// Code generated using gormcngen. DO NOT EDIT.
+// This file was auto generated via github.com/yyle88/gormcngen
+// Generated from: ngen_test.go:21 -> models.TestGenerate
+// ========== GORMCNGEN:DO-NOT-EDIT-MARKER:END ==========
+
 package models
 
 import (
@@ -12,6 +17,7 @@ func (one *Person) Columns() *PersonColumns {
 
 func (one *Person) TableColumns(decoration gormcnm.ColumnNameDecoration) *PersonColumns {
 	return &PersonColumns{
+		// Auto-generated: column mapping in table operations. DO NOT EDIT. // 自动生成：表操作的列映射。请勿编辑。
 		ID:        gormcnm.Cmn(one.ID, "id", decoration),
 		Name:      gormcnm.Cmn(one.Name, "name", decoration),
 		BirthDate: gormcnm.Cmn(one.BirthDate, "birth_date", decoration),
@@ -22,9 +28,9 @@ func (one *Person) TableColumns(decoration gormcnm.ColumnNameDecoration) *Person
 }
 
 type PersonColumns struct {
-	// Embedding operation functions make it easy to use // 继承操作函数便于使用
+	// Auto-generated: embedding operation functions to make it simple to use. DO NOT EDIT. // 自动生成：嵌入操作函数便于使用。请勿编辑。
 	gormcnm.ColumnOperationClass
-	// The column names and types of the model's columns // 模型各列的列名和类型
+	// Auto-generated: column names and types in database table. DO NOT EDIT. // 自动生成：数据库表的列名和类型。请勿编辑。
 	ID        gormcnm.ColumnName[int32]
 	Name      gormcnm.ColumnName[string]
 	BirthDate gormcnm.ColumnName[string]
@@ -39,6 +45,7 @@ func (one *Example) Columns() *ExampleColumns {
 
 func (one *Example) TableColumns(decoration gormcnm.ColumnNameDecoration) *ExampleColumns {
 	return &ExampleColumns{
+		// Auto-generated: column mapping in table operations. DO NOT EDIT. // 自动生成：表操作的列映射。请勿编辑。
 		ID:        gormcnm.Cmn(one.ID, "id", decoration),
 		Name:      gormcnm.Cmn(one.Name, "name", decoration),
 		CreatedAt: gormcnm.Cmn(one.CreatedAt, "created_at", decoration),
@@ -47,9 +54,9 @@ func (one *Example) TableColumns(decoration gormcnm.ColumnNameDecoration) *Examp
 }
 
 type ExampleColumns struct {
-	// Embedding operation functions make it easy to use // 继承操作函数便于使用
+	// Auto-generated: embedding operation functions to make it simple to use. DO NOT EDIT. // 自动生成：嵌入操作函数便于使用。请勿编辑。
 	gormcnm.ColumnOperationClass
-	// The column names and types of the model's columns // 模型各列的列名和类型
+	// Auto-generated: column names and types in database table. DO NOT EDIT. // 自动生成：数据库表的列名和类型。请勿编辑。
 	ID        gormcnm.ColumnName[int32]
 	Name      gormcnm.ColumnName[string]
 	CreatedAt gormcnm.ColumnName[time.Time]

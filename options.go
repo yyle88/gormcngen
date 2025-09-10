@@ -1,5 +1,5 @@
-// Package gormcngen: Configuration options for intelligent code generation behavior
-// Provides fine-grained control over AST-based code generation process
+// Package gormcngen: Configuration options for intelligent code generation actions
+// Provides fine-grained control of AST-based code generation process
 // Supports various generation modes, tag handling, and output customization
 //
 // gormcngen: 智能代码生成行为的配置选项
@@ -7,28 +7,28 @@
 // 支持各种生成模式、标签处理和输出自定义
 package gormcngen
 
-// Options provides fine-grained control over code generation behavior
+// Options provides fine-grained control of code generation actions
 // Configures various aspects of the intelligent code generation process
-// Controls struct export visibility, tag processing, field filtering, and method generation
+// Controls struct export status, tag processing, field filtering, and method generation
 //
 // Options 配置智能代码生成过程的各个方面
 // 控制结构体导出可见性、标签处理、字段过滤和方法生成
 type Options struct {
-	columnClassExportable bool   // Whether to generate exported or non-exported structures. // 是否生成导出结构或非导出结构
-	useTagName            bool   // Whether to use tag names as field names. // 是否使用标签名作为字段名
-	tagKeyName            string // Tag key to store field names. // 存储字段名的标签键
-	excludeUntaggedFields bool   // Whether to skip fields without tags. // 是否跳过没有标签的字段
+	columnClassExportable bool   // Generate exported structures instead of non-exported ones. // 是否生成导出结构或非导出结构
+	useTagName            bool   // Use tag names as field names. // 是否使用标签名作为字段名
+	tagKeyName            string // Tag that stores field names. // 存储字段名的标签键
+	excludeUntaggedFields bool   // Skip fields without tags. // 是否跳过没有标签的字段
 	columnsMethodRecvName string // Columns method receiver variable name. // Columns 函数的接受者名称
-	columnsCheckFieldType bool   // Whether the Columns method checks field types. // Columns 函数是否检查字段类型
-	embedColumnOperations bool   // Whether to embed ColumnOperationClass. // 是否嵌套 ColumnOperationClass
-	matchIgnoreExportable bool   // Whether to ignore the exportable-case when matching. // 匹配时是否忽略导出性
-	isGenFuncTableColumns bool   // Whether to generate the table columns function. // 是否生成表表的列函数
-	isGenNewSimpleColumns bool   // Whether to generate the plain columns function. // 是否生成简单的列函数
+	columnsCheckFieldType bool   // Columns method checks field types. // Columns 函数是否检查字段类型
+	embedColumnOperations bool   // Embed ColumnOperationClass. // 是否嵌套 ColumnOperationClass
+	matchIgnoreExportable bool   // Ignore the exportable-case when matching. // 匹配时是否忽略导出性
+	isGenFuncTableColumns bool   // Generate the table columns function. // 是否生成表表的列函数
+	isGenNewSimpleColumns bool   // Generate the plain columns function. // 是否生成简单的列函数
 }
 
 // NewOptions creates a new Options instance with sensible default values
 // Initializes configuration optimized for common use cases and best practices
-// Returns a pre-configured instance ready for customization via With methods
+// Returns a pre-configured instance prepared for customization via With methods
 //
 // NewOptions 创建一个具有合理默认值的 Options 实例
 // 初始化针对常见用例和最佳实践优化的配置

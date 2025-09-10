@@ -7,7 +7,7 @@
 
 # gormcngen
 
-`gormcngen`: Provides a Columns() Function to Retrieve Column Names for GORM Models
+`gormcngen`: Provides a Columns() Function to Retrieve Column Names from GORM Models
 
 Like `MyBatis Plus` in the Java ecosystem, which allows developers to get column names using expressions like `Example::getName`.
 
@@ -23,30 +23,30 @@ Like `SQLAlchemy` in the Python ecosystem, which allows developers to access col
 [中文说明](README.zh.md)
 <!-- TEMPLATE (EN) END: LANGUAGE NAVIGATION -->
 
-## Key Features
+## Core Features
 
-### 🔍 AST-Level Precision
+### 🔍 AST-Grade Precision
 - **Deep model analysis**: Parses struct fields, tags, and embedded types
 - **GORM tag extraction**: Auto detects column names, types, and constraints
 - **Embedded field support**: Handles `gorm.Model` and custom embedded structs
 - **Type preservation**: Maintains exact Go types in generated code
 
 ### 🚀 Smart Code Generation
-- **Perfect synchronization**: Generated code always matches your models
+- **Perfect synchronization**: Generated code always matches the models
 - **Custom column names**: Respects `gorm:"column:name"` tags
-- **Native language support**: Works with `cnm:"中文名"` tags for international development
-- **Incremental updates**: Regenerates just what changed
+- **Native language support**: Works with `cnm:"中文名"` tags to enable multi-language development
+- **Smart updates**: Regenerates just what changed
 
-### 🛠️ Developer Experience
-- **Simple programming API**: Easy-to-use Go API for immediate results
-- **IDE integration**: Generated code provides full IntelliSense support
-- **Build system compatible**: Easy integration with `go:generate` directives
-- **Version control safe**: Deterministic output for clean diffs
+### 🛠️ Development Experience
+- **Simple programming API**: Simple Go API with immediate results
+- **IDE integration**: Generated code provides complete IntelliSense support
+- **Build system compatible**: Simple integration with `go:generate` directives
+- **Version management safe**: Deterministic output with clean diffs
 
-### 🏢 Enterprise Ready
+### 🏢 Enterprise Grade
 - **Large codebase support**: Handles hundreds of models with ease
 - **Custom naming conventions**: Configurable output patterns
-- **Validation and safety**: Built-in checks prevent invalid generation
+- **Validation and protection**: Built-in checks prevent invalid generation
 - **Documentation generation**: Auto-generated comments explain column mappings
 
 ## 🏗️ Ecosystem Position
@@ -86,9 +86,9 @@ Like `SQLAlchemy` in the Python ecosystem, which allows developers to access col
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
-**gormcngen** serves as the **code generation engine** that bridges your models with the type-safe foundation layer.
+**gormcngen** serves as the **code generation engine** that bridges models with the type-safe foundation base.
 
-## Install
+## Installation
 
 ```bash
 go get github.com/yyle88/gormcngen
@@ -102,16 +102,16 @@ go get github.com/yyle88/gormcngen
 
 ### 1. Create Project Structure
 
-Set up the basic project structure and create dedicated DIR for models and generated code:
+Set up the basic project structure and create dedicated DIR to hold models and generated code:
 
 ```bash
 # Create models DIR
 mkdir -p internal/models
 ```
 
-### 2. Define Your GORM Models
+### 2. Define GORM Models
 
-Define your data models - gormcngen will generate column access methods for these models:
+Define data models - gormcngen generates column access methods from these models:
 
 Create `internal/models/models.go`:
 ```go
@@ -128,7 +128,7 @@ type User struct {
 
 ### 3. Create Generation Files
 
-Create the target file for generated code and the test file containing generation logic:
+Create the target file to hold generated code and the test file containing generation logic:
 
 ```bash
 # Create target file for generated code with package declaration
@@ -175,16 +175,18 @@ func TestGenerate(t *testing.T) {
     
     // Create config and generate
     cfg := gormcngen.NewConfigs(models, options, absPath)
+    cfg.WithIsGenPreventEdit(true)  // Add "DO NOT EDIT" warning headers (default: true)
+    cfg.WithGeneratedFromPos(gormcngen.GetGenPosFuncMark(0))  // Show generation source location (default: show)
     cfg.Gen()
 }
 ```
 
 ### 5. Execute Generation
 
-Run the test to trigger code generation - the generated code will be auto written to the target file:
+Run the test to initiate code generation - the generated code gets auto written to the target file:
 
 ```bash
-# Tidy dependencies
+# Clean up dependencies
 go mod tidy
 
 # Run generation test
@@ -192,13 +194,15 @@ cd internal/models
 go test -v ./...
 ```
 
-🎉 **Generation Complete!** Your `ngen.go` file now contains the generated column access methods.
+🎉 **Generation Complete!** The `ngen.go` file now contains the generated column access methods.
 
-The generated `ngen.go` will contain:
+The generated `ngen.go` contains:
 
 ```go
-// AUTO-GENERATED - DO NOT EDIT
-// Generated by gormcngen
+// Code generated using gormcngen. DO NOT EDIT.
+// This file was auto generated via github.com/yyle88/gormcngen
+// Generated from: ngen_test.go:20 -> models.TestGenerate
+// ========== GORMCNGEN:DO-NOT-EDIT-MARKER:END ==========
 
 func (c *User) Columns() *UserColumns {
     return &UserColumns{
@@ -220,17 +224,17 @@ type UserColumns struct {
 }
 ```
 
-🚀 **Setup Complete!** You now have type-safe column access methods for your models.
+🚀 **Setup Complete!** You now have type-safe column access methods to work with models.
 
-### 6. Use in Your Business Logic
+### 6. Use in Business Logic
 
-Now when writing your business code, you can use the generated type-safe column methods for database queries:
+Now when writing business code, you can use the generated type-safe column methods to build database queries:
 
 ```go
 var user User
 cls := user.Columns()
 
-// Perfect type safety with zero boilerplate
+// Perfect type protection with zero boilerplate
 err := db.Where(cls.Username.Eq("alice")).
          Where(cls.Age.Gte(18)).
          Where(cls.IsActive.Eq(true)).
@@ -239,9 +243,9 @@ err := db.Where(cls.Username.Eq("alice")).
 
 ✨ **Benefits of this approach:**
 - **Compile-time protection**: Typos in column names become compilation errors
-- **IDE intelligence**: Full autocomplete and refactoring support  
-- **Zero boilerplate**: No manual column name management required
-- **Always synchronized**: Generated code stays in sync with your models auto
+- **IDE intelligence**: Complete autocomplete and refactoring support  
+- **Zero boilerplate**: No hand-written column name management required
+- **Always synchronized**: Generated code stays in sync with the models auto
 
 ### Advanced Usage
 
@@ -254,19 +258,21 @@ options := gormcngen.NewOptions().
 // Chinese field name support
 chineseOptions := gormcngen.NewOptions().
     WithUseTagName(true).                      // Use cnm tag values as field names  
-    WithTagKeyName("cnm").                     // Specify 'cnm' as the tag key
+    WithTagKeyName("cnm").                     // Set 'cnm' as the tag name
     WithColumnClassExportable(true)
 
 // Advanced features (from example6)
 advancedOptions := gormcngen.NewOptions().
     WithColumnClassExportable(true).           // Exported struct names
-    WithColumnsMethodRecvName("one").          // Custom receiver name
+    WithColumnsMethodRecvName("one").          // Custom method argument
     WithColumnsCheckFieldType(true).           // Type checking (recommended)
     WithIsGenFuncTableColumns(true)            // Generate TableColumns function
 
 // Batch processing multiple models
-allModels := []interface{}{&User{}, &Product{}, &Order{}, &Customer{}}
+allModels := []interface{}{&User{}, &Product{}, &Item{}, &Client{}}
 configs := gormcngen.NewConfigs(allModels, options, "models_gen.go")
+configs.WithIsGenPreventEdit(true)  // Add "DO NOT EDIT" headers to generated files
+configs.WithGeneratedFromPos(gormcngen.GetGenPosFuncMark(0))  // Show generation source location (default: show)
 configs.Gen()
 ```
 
@@ -274,7 +280,7 @@ configs.Gen()
 
 ### Multi-Language Field Support
 
-The `cnm` tag allows you to define Chinese aliases for field names, which are generated as additional struct fields:
+The `cnm` tag lets you define Chinese aliases to use as field names, which are generated as extra struct fields:
 
 ```go
 type Product struct {
@@ -317,7 +323,7 @@ func (*Product) Columns() *ProductColumns {
 
 **Using Chinese Field Names in Queries:**
 
-With the generated Chinese aliases, you can write queries using your native language:
+With the generated Chinese aliases, you can write queries using native language:
 
 ```go
 var product Product
@@ -333,7 +339,7 @@ if err := db.Where(cls.V产品名称.Eq("iPhone")).
 fmt.Println("Found product:", product.Name)
 ```
 
-This allows developers to write more readable code in their native language while maintaining full type safety and database compatibility.
+This allows developers to write more readable code in native language while maintaining complete type protection and database support.
 
 ### Go Generate Integration
 
@@ -345,7 +351,7 @@ package main
 
 import (
     "github.com/yyle88/gormcngen"
-    "your-project/models"
+    "project-name/models"
 )
 
 func main() {
@@ -356,7 +362,7 @@ func main() {
 }
 ```
 
-Then use in your model files:
+Then use in the target files:
 
 ```go
 //go:generate go run scripts/generate_columns.go
@@ -368,10 +374,10 @@ type User struct {
 }
 ```
 
-## Integration with GORM Repository Pattern
+## Integration with GORM Repo Pattern
 
 ```go
-// Generated columns work seamlessly with gormrepo
+// Generated columns integrate with gormrepo
 repo := gormrepo.NewRepo(gormclass.Use(&Product{}))
 
 products, total, err := repo.Repo(db).FindPageAndCount(
@@ -379,7 +385,7 @@ products, total, err := repo.Repo(db).FindPageAndCount(
         // Can use English field name
         return db.Where(cls.Name.Like("%computer%")).
                Where(cls.Price.Between(1000, 5000))
-        // Or use Chinese alias field for same column
+        // Also supports Chinese alias field access to same column
         // return db.Where(cls.V产品名称.Like("%电脑%")).
         //        Where(cls.Price.Between(1000, 5000))
     },
@@ -392,33 +398,34 @@ products, total, err := repo.Repo(db).FindPageAndCount(
 
 ---
 
-**This is a straightforward way to install and use `gormcngen` to generate the `Columns()` method for GORM models, allowing you to easily build queries with column names in any language.**
+**This is a simple method to setup and use `gormcngen` to generate the `Columns()` function with GORM models, enabling you to build queries with column names in different languages.**
 
 ---
 
 ## Examples
 
 See [examples](internal/examples) and [demos](internal/demos) directories for:
-- Basic model generation examples
+- Basic generation examples
 - Chinese field handling examples
-- Batch model processing examples
+- Batch processing examples
 - Custom configuration examples
-- Real database operation examples
+- Database operation examples
 
-## Benefits Over Manual Column Definitions
+## Benefits Versus Static Column Definitions
 
-| Aspect | Manual Definitions | GORMCNGEN |
+| Aspect | Static Definitions | GORMCNGEN |
 |--------|-------------------|-----------|
-| **Setup Time** | ⏰ Hours of manual typing | ⚡ Seconds with programming API |
-| **Accuracy** | ❌ Prone to typos and mistakes | ✅ 100% accurate AST parsing |
-| **Synchronization** | ❌ Manual updates required | ✅ Always in sync with models |
-| **Type Safety** | 🟡 Depends on manual accuracy | ✅ Perfect type preservation |
-| **Embedded Fields** | ❌ Complex manual handling | ✅ Automatic detection |
-| **Native Language** | ❌ Manual tag mapping | ✅ Intelligent tag processing |
-| **Large Codebases** | 😫 Maintenance nightmare | 🚀 Scales effortlessly |
-| **Team Productivity** | 🐌 Slow and error-prone | ⚡ Fast and reliable |
+| **Setup Time** | ⏰ Hours of hand-written typing | ⚡ Seconds with programming API |
+| **Precision** | ❌ Prone to typos and mistakes | ✅ 100% accurate AST parsing |
+| **Synchronization** | ❌ Hand-written updates required | ✅ Always in sync with models |
+| **Type Protection** | 🟡 Depends on hand-written precision | ✅ Perfect type preservation |
+| **Embedded Fields** | ❌ Complex hand-written handling | ✅ Automatic detection |
+| **Native Language** | ❌ Hand-written tag mapping | ✅ Intelligent tag processing |
+| **Large Codebases** | 😫 Maintenance nightmare | 🚀 Works at scale |
+| **Team Performance** | 🐌 Slow and error-prone | ⚡ Fast and reliable |
 
 <!-- TEMPLATE (EN) BEGIN: STANDARD PROJECT FOOTER -->
+<!-- VERSION 2025-09-06 04:53:24.895249 +0000 UTC -->
 
 ## 📄 License
 
@@ -433,12 +440,12 @@ Contributions are welcome! Report bugs, suggest features, and contribute code:
 - 🐛 **Found a bug?** Open an issue on GitHub with reproduction steps
 - 💡 **Have a feature idea?** Create an issue to discuss the suggestion
 - 📖 **Documentation confusing?** Report it so we can improve
-- 🚀 **Need new features?** Share your use cases to help us understand requirements
-- ⚡ **Performance issue?** Help us optimize by reporting slow operations
+- 🚀 **Need new features?** Share the use cases to help us understand requirements
+- ⚡ **Performance issue?** Help us optimize through reporting slow operations
 - 🔧 **Configuration problem?** Ask questions about complex setups
-- 📢 **Follow project progress?** Watch the repo for new releases and features
-- 🌟 **Success stories?** Share how this package improved your workflow
-- 💬 **General feedback?** All suggestions and comments are welcome
+- 📢 **Follow project progress?** Watch the repo to get new releases and features
+- 🌟 **Success stories?** Share how this package improved the workflow
+- 💬 **Feedback?** We welcome suggestions and comments
 
 ---
 
@@ -446,13 +453,13 @@ Contributions are welcome! Report bugs, suggest features, and contribute code:
 
 New code contributions, follow this process:
 
-1. **Fork**: Fork the repo on GitHub (using the webpage interface).
+1. **Fork**: Fork the repo on GitHub (using the webpage UI).
 2. **Clone**: Clone the forked project (`git clone https://github.com/yourname/repo-name.git`).
 3. **Navigate**: Navigate to the cloned project (`cd repo-name`)
 4. **Branch**: Create a feature branch (`git checkout -b feature/xxx`).
-5. **Code**: Implement your changes with comprehensive tests
+5. **Code**: Implement the changes with comprehensive tests
 6. **Testing**: (Golang project) Ensure tests pass (`go test ./...`) and follow Go code style conventions
-7. **Documentation**: Update documentation for user-facing changes and use meaningful commit messages
+7. **Documentation**: Update documentation to support client-facing changes and use significant commit messages
 8. **Stage**: Stage changes (`git add .`)
 9. **Commit**: Commit changes (`git commit -m "Add feature xxx"`) ensuring backward compatible code
 10. **Push**: Push to the branch (`git push origin feature/xxx`).
@@ -464,7 +471,7 @@ Please ensure tests pass and include relevant documentation updates.
 
 ## 🌟 Support
 
-Welcome to contribute to this project by submitting pull requests and reporting issues.
+Welcome to contribute to this project via submitting merge requests and reporting issues.
 
 **Project Support:**
 
@@ -473,7 +480,7 @@ Welcome to contribute to this project by submitting pull requests and reporting 
 - 📝 **Write tech blogs** about development tools and workflows - we provide content writing support
 - 🌟 **Join the ecosystem** - committed to supporting open source and the (golang) development scene
 
-**Happy Coding with this package!** 🎉
+**Have Fun Coding with this package!** 🎉
 
 <!-- TEMPLATE (EN) END: STANDARD PROJECT FOOTER -->
 

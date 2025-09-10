@@ -1,9 +1,9 @@
 // Package gormcngen: Schema-based configuration and single-use code generation
-// Handles individual model schema analysis and targeted code generation
-// Provides precise control over column struct generation and method creation
+// Handles single instance schema analysis and targeted code generation
+// Provides precise control of column struct generation and method creation
 //
 // gormcngen: 基于 schema 的配置和单次使用代码生成
-// 处理单个模型 schema 分析和针对性代码生成
+// 处理单个模式 schema 分析和针对性代码生成
 // 提供对列结构体生成和方法创建的精确控制
 package gormcngen
 
@@ -35,22 +35,22 @@ import (
 // 包含已解析的 schema 信息以及生成选项和命名偏好
 // 管理从 schema 分析到代码输出生成的完整生命周期
 type SchemaConfig struct {
-	sch                    *schema.Schema // Parsed GORM schema from model struct // 从模型结构体解析的 GORM schema
+	sch                    *schema.Schema // Parsed GORM schema from struct // 从模型结构体解析的 GORM schema
 	structName             string         // Generated column struct name // 生成的列结构体名称
 	methodName             string         // Generated Columns() method name // 生成的 Columns() 方法名称
 	methodNameTableColumns string
-	options                *Options // Generation behavior configuration options // 生成行为配置选项
+	options                *Options // Generation configuration options // 生成行为配置选项
 }
 
-// NewSchemaConfig creates a SchemaConfig instance from a GORM model and generation options
-// Parses the model structure using GORM schema parsing and applies naming strategies
+// NewSchemaConfig creates a SchemaConfig instance from a GORM structure and generation options
+// Parses the structure using GORM schema parsing and applies naming strategies
 // Initializes schema analysis, shows debug information, and configures generation parameters
-// Returns a fully configured SchemaConfig ready for code generation
+// Returns a configured SchemaConfig prepared for code generation
 //
 // NewSchemaConfig 从 GORM 模型和生成选项创建 SchemaConfig 实例
 // 使用 GORM schema 解析器解析模型结构并应用命名策略
 // 初始化 schema 分析，显示调试信息，并配置生成参数
-// 返回一个完全配置的 SchemaConfig，准备进行代码生成
+// 返回一个完整配置的 SchemaConfig，准备进行代码生成
 func NewSchemaConfig(object interface{}, options *Options) *SchemaConfig {
 	sch := rese.P1(schema.Parse(object, &sync.Map{}, &schema.NamingStrategy{
 		SingularTable: false, //这是gorm默认的
@@ -156,18 +156,20 @@ func (c *Config) Gen() *GenOutput {
 	}
 
 	if c.options.embedColumnOperations {
-		structPtx.Println("\t", "// Embedding operation functions make it easy to use // 继承操作函数便于使用")
+		structPtx.Println("\t", "// Auto-generated: embedding operation functions to make it simple to use. DO NOT EDIT. // 自动生成：嵌入操作函数便于使用。请勿编辑。")
 		structPtx.Println("\t", fmt.Sprintf("%s.%s", pkgNameGormCnm, operationClass.Name()))
 	}
-	structPtx.Println("\t", "// The column names and types of the model's columns // 模型各列的列名和类型")
+	structPtx.Println("\t", "// Auto-generated: column names and types in database table. DO NOT EDIT. // 自动生成：数据库表的列名和类型。请勿编辑。")
 
 	if c.options.isGenFuncTableColumns {
 		must.Nice(c.options.columnsMethodRecvName)
 		must.True(c.options.columnsCheckFieldType)
 		methodPtx.Println(fmt.Sprintf("	return %s.%s(gormcnm.NewPlainDecoration())", c.options.columnsMethodRecvName, c.methodNameTableColumns))
 		methodTableColumnsPtx.Println(fmt.Sprintf("	return &%s{", c.structName))
+		methodTableColumnsPtx.Println("\t// Auto-generated: column mapping in table operations. DO NOT EDIT. // 自动生成：表操作的列映射。请勿编辑。")
 	} else {
 		methodPtx.Println(fmt.Sprintf("	return &%s{", c.structName))
+		methodPtx.Println("\t// Auto-generated: column names and types mapping. DO NOT EDIT. // 自动生成：列名和类型映射。请勿编辑。")
 		methodTableColumnsPtx.Println(fmt.Sprintf("	panic(\"METHOD %s.%s IS NOT IMPLEMENTED\")", c.structName, c.methodNameTableColumns))
 	}
 	for _, field := range c.sch.Fields {

@@ -20,15 +20,16 @@ func (*User) TableName() string {
 
 func (*User) Columns() *UserColumns {
 	return &UserColumns{
+		// Auto-generated: column names and types mapping. DO NOT EDIT. // 自动生成：列名和类型映射。请勿编辑。
 		ID:   "id",
 		Name: "name",
 	}
 }
 
 type UserColumns struct {
-	// Embedding operation functions make it easy to use // 继承操作函数便于使用
+	// Auto-generated: embedding operation functions to make it simple to use. DO NOT EDIT. // 自动生成：嵌入操作函数便于使用。请勿编辑。
 	gormcnm.ColumnOperationClass
-	// The column names and types of the model's columns // 模型各列的列名和类型
+	// Auto-generated: column names and types in database table. DO NOT EDIT. // 自动生成：数据库表的列名和类型。请勿编辑。
 	ID   gormcnm.ColumnName[uint]
 	Name gormcnm.ColumnName[string]
 }
@@ -46,6 +47,7 @@ func (*Order) TableName() string {
 
 func (*Order) Columns() *OrderColumns {
 	return &OrderColumns{
+		// Auto-generated: column names and types mapping. DO NOT EDIT. // 自动生成：列名和类型映射。请勿编辑。
 		ID:          "id",
 		UserID:      "user_id",
 		ProductName: "product_name",
@@ -54,9 +56,9 @@ func (*Order) Columns() *OrderColumns {
 }
 
 type OrderColumns struct {
-	// Embedding operation functions make it easy to use // 继承操作函数便于使用
+	// Auto-generated: embedding operation functions to make it simple to use. DO NOT EDIT. // 自动生成：嵌入操作函数便于使用。请勿编辑。
 	gormcnm.ColumnOperationClass
-	// The column names and types of the model's columns // 模型各列的列名和类型
+	// Auto-generated: column names and types in database table. DO NOT EDIT. // 自动生成：数据库表的列名和类型。请勿编辑。
 	ID          gormcnm.ColumnName[uint]
 	UserID      gormcnm.ColumnName[uint]
 	ProductName gormcnm.ColumnName[string]

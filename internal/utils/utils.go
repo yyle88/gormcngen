@@ -1,6 +1,6 @@
-// Package utils: Internal utility functions for gormcngen code generation
-// Provides helper functions for string manipulation and exportability conversion
-// Supports case conversion and visibility toggles for generated identifiers
+// Package utils: Internal utilities for gormcngen code generation
+// Provides functions for string manipulation and exportable status conversion
+// Supports case conversion and status toggles for generated identifiers
 //
 // utils: gormcngen 代码生成的内部工具函数
 // 提供字符串操作和导出性转换的辅助函数
@@ -11,7 +11,7 @@ import (
 	"unicode"
 )
 
-// ConvertToUnexportable converts the first character of a string to lowercase
+// ConvertToUnexportable converts the first string character to lowercase
 // Transforms exported identifiers to unexported ones for internal use
 // Returns the string with the first rune converted to lowercase
 //
@@ -28,7 +28,7 @@ func ConvertToUnexportable(s string) string {
 
 // IsExportable checks if an identifier is exportable (starts with uppercase)
 // Returns true if the first character is uppercase, false otherwise
-// Used to determine visibility of generated structs and methods
+// Used to determine status of generated structs and methods
 //
 // IsExportable 检查标识符是否可导出（以大写字母开头）
 // 如果第一个字符是大写返回 true，否则返回 false
@@ -37,7 +37,7 @@ func IsExportable(name string) bool {
 	return unicode.IsUpper(([]rune(name))[0])
 }
 
-// SwitchToggleExportable toggles the exportability of an identifier
+// SwitchToggleExportable toggles the exportable status of an identifier
 // Converts uppercase first character to lowercase and vice versa
 // Used for finding alternative struct names during AST analysis
 //

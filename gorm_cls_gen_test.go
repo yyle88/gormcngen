@@ -34,11 +34,13 @@ func TestConfigs_Generate(t *testing.T) {
 		&Example{},
 		&Demo{},
 	}, options, path)
+	cfg.WithIsGenPreventEdit(false)
 	cfg.Generate()
 }
 
 func (*Example) Columns() *ExampleColumns {
 	return &ExampleColumns{
+		// Auto-generated: column names and types mapping. DO NOT EDIT. // 自动生成：列名和类型映射。请勿编辑。
 		Name: "name",
 		Type: "type",
 		Rank: "rank",
@@ -46,9 +48,9 @@ func (*Example) Columns() *ExampleColumns {
 }
 
 type ExampleColumns struct {
-	// Embedding operation functions make it easy to use // 继承操作函数便于使用
+	// Auto-generated: embedding operation functions to make it simple to use. DO NOT EDIT. // 自动生成：嵌入操作函数便于使用。请勿编辑。
 	gormcnm.ColumnOperationClass
-	// The column names and types of the model's columns // 模型各列的列名和类型
+	// Auto-generated: column names and types in database table. DO NOT EDIT. // 自动生成：数据库表的列名和类型。请勿编辑。
 	Name gormcnm.ColumnName[string]
 	Type gormcnm.ColumnName[string]
 	Rank gormcnm.ColumnName[int]
@@ -56,6 +58,7 @@ type ExampleColumns struct {
 
 func (*Demo) Columns() *DemoColumns {
 	return &DemoColumns{
+		// Auto-generated: column names and types mapping. DO NOT EDIT. // 自动生成：列名和类型映射。请勿编辑。
 		ID:        "id",
 		CreatedAt: "created_at",
 		UpdatedAt: "updated_at",
@@ -66,9 +69,9 @@ func (*Demo) Columns() *DemoColumns {
 }
 
 type DemoColumns struct {
-	// Embedding operation functions make it easy to use // 继承操作函数便于使用
+	// Auto-generated: embedding operation functions to make it simple to use. DO NOT EDIT. // 自动生成：嵌入操作函数便于使用。请勿编辑。
 	gormcnm.ColumnOperationClass
-	// The column names and types of the model's columns // 模型各列的列名和类型
+	// Auto-generated: column names and types in database table. DO NOT EDIT. // 自动生成：数据库表的列名和类型。请勿编辑。
 	ID        gormcnm.ColumnName[uint]
 	CreatedAt gormcnm.ColumnName[time.Time]
 	UpdatedAt gormcnm.ColumnName[time.Time]
