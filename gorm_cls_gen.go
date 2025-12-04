@@ -1,7 +1,7 @@
 // Package gormcngen: Intelligent GORM code generation engine with AST-grade precision
 // Auto generates type-safe column structs and Columns() methods from GORM models
 // Supports complex scenarios including embedded fields, custom tags, and native language columns
-// Provides intelligent code injection and incremental updates for zero-maintenance workflows
+// Provides intelligent code injection and smart updates to achieve zero-maintenance workflows
 //
 // gormcngen: 智能 GORM 代码生成引擎，具备 AST 级精度
 // 从 GORM 模型自动生成类型安全的列结构体和 Columns() 方法
@@ -13,6 +13,7 @@ import (
 	"go/ast"
 	"go/token"
 	"os"
+	"path/filepath"
 	"strings"
 	"sync/atomic"
 
@@ -21,6 +22,7 @@ import (
 	"github.com/yyle88/gormcngen/internal/utils"
 	"github.com/yyle88/gormcnm"
 	"github.com/yyle88/must/mustnum"
+	"github.com/yyle88/osexistpath/osmustexist"
 	"github.com/yyle88/rese"
 	"github.com/yyle88/sortx"
 	"github.com/yyle88/syntaxgo/syntaxgo_ast"
@@ -115,9 +117,9 @@ func (cfg *Configs) WithIsGenPreventEdit(isGenPreventEdit bool) *Configs {
 	return cfg
 }
 
-// WithGeneratedFromPos sets custom source location info for generated files
-// Pass empty string to disable source location info
-// Pass non-empty string to show custom location info in generated file headers
+// WithGeneratedFromPos sets custom source location info in generated files
+// Pass blank string to disable source location info
+// Pass non-blank string to show custom location info in generated file headings
 // Use GetGenPosFuncMark() function to auto get current position
 //
 // WithGeneratedFromPos 为生成文件设置自定义源位置信息
@@ -142,7 +144,7 @@ func (cfg *Configs) Generate() {
 
 // Gen is the core AST-powered code generation engine
 // Analyzes provided schemas and generates type-safe column structs and methods
-// Handles complex scenarios including existing code detection, incremental updates, and intelligent merging
+// Handles complex scenarios including existing code detection, smart updates, and intelligent merging
 // Uses sophisticated AST manipulation to ensure precise code injection without breaking existing logic
 //
 // Gen 是核心的 AST 驱动代码生成引擎
@@ -172,6 +174,10 @@ func (cfg *Configs) Gen() {
 
 		// Handle method-related code logic. // 处理与方法相关的代码逻辑
 		if path := cfg.methodOutputPath; path != "" {
+			if !osmustexist.IsFileExist(path) {
+				panicSourceFileNotExist(path, filepath.Base(schemaConfig.sch.ModelType.PkgPath()))
+			}
+
 			astBundle := rese.P1(syntaxgo_ast.NewAstBundleV4(path))
 			astFile, _ := astBundle.GetBundle()
 
@@ -231,6 +237,10 @@ func (cfg *Configs) Gen() {
 
 		// Handle struct-related code logic. // 处理与结构体相关的代码逻辑
 		if path := cfg.structOutputPath; path != "" {
+			if !osmustexist.IsFileExist(path) {
+				panicSourceFileNotExist(path, filepath.Base(schemaConfig.sch.ModelType.PkgPath()))
+			}
+
 			astBundle := rese.P1(syntaxgo_ast.NewAstBundleV4(path))
 			astFile, _ := astBundle.GetBundle()
 
@@ -244,7 +254,7 @@ func (cfg *Configs) Gen() {
 					// If the struct name is not found, toggle the exportable statue of the struct name.
 					// 如果结构体名称未找到，则切换结构体名称的导出性（首字母大小写）
 					newStructName := utils.SwitchToggleExportable(schemaConfig.structName)
-					// If the toggled struct name differs from the original, search again with the new name.
+					// If the toggled struct name differs from the first name, search again with the new name.
 					// 如果切换后的结构体名称与原名称不同，使用新名称再次查找
 					if newStructName != schemaConfig.structName {
 						// Find the struct declaration using the new name with the toggled exportable.
@@ -280,10 +290,10 @@ func (cfg *Configs) Gen() {
 		if a.exist != b.exist {
 			return a.exist // Sort existing code blocks to the front // 已存在的代码块排在前面
 		} else {
-			if a.exist { // If both blocks exist, prioritize the one with the later line number // 如果都已存在，优先排在后面行号更大的代码块
-				return a.astNode.Pos() > b.astNode.Pos() // Sort by larger line numbers first // 按行号较大的排在前面
-			} else { // If neither block exists, maintain the creation order // 如果都不存在，按创建顺序排序
-				return a.astNode.Pos() < b.astNode.Pos() // Keep code blocks created earlier at the front // 保持先创建的代码块排在前面
+			if a.exist { // If both blocks exist, place the one with subsequent line position first // 如果都已存在，优先排在后面行号更大的代码块
+				return a.astNode.Pos() > b.astNode.Pos() // Position with high line count comes first // 按行号较大的排在前面
+			} else { // When none of the blocks exist, maintain the creation sequence // 如果都不存在，按创建顺序排序
+				return a.astNode.Pos() < b.astNode.Pos() // Keep code blocks created first at the front // 保持先创建的代码块排在前面
 			}
 		}
 	})
@@ -301,7 +311,7 @@ func (cfg *Configs) Gen() {
 		if _, ok := path2codeMap[elem.sourcePath]; !ok {
 			path2codeMap[elem.sourcePath] = &sourceAndImportsTuple{
 				sourceCode: done.VAE(os.ReadFile(elem.sourcePath)).Done(), // Read the existing source code from the file // 读取文件的现有源代码
-				pkgImports: map[string]bool{},                             // Initialize with an empty set of imports // 初始化为空的导入包集合
+				pkgImports: map[string]bool{},                             // Initialize with a blank set of imports // 初始化为空的导入包集合
 			}
 		}
 	}
@@ -322,7 +332,7 @@ func (cfg *Configs) Gen() {
 		}
 	}
 
-	// Inject the necessary imports into the source code. // 将必要的导入包注入源代码
+	// Inject the required imports into the source code. // 将必要的导入包注入源代码
 	for _, tuple := range path2codeMap {
 		options := syntaxgo_ast.NewPackageImportOptions()
 		options.SetPkgPaths(maps.Keys(tuple.pkgImports))
@@ -346,7 +356,7 @@ func (cfg *Configs) Gen() {
 // processDoNotEditComment adds or removes "DO NOT EDIT" comment headers based on options
 // When isGenPreventEdit is true, adds warning comments to files
 // When isGenPreventEdit is false, removes existing generated headers
-// Returns the source code with proper header processing and spacing
+// Returns the source code with correct heading processing and spacing
 //
 // processDoNotEditComment 根据选项添加或移除"请勿编辑"注释头部
 // 当 isGenPreventEdit 为 true 时，向文件添加警告注释
@@ -376,4 +386,23 @@ func processDoNotEditComment(sourceCode []byte, isGenPreventEdit bool, generated
 	} else {
 		return []byte(newSource)
 	}
+}
+
+// panicSourceFileNotExist panics when the source file does not exist
+// gormcngen uses AST-based code injection which requires an existing source file
+// Panic with clear message helps users understand they need to create the file with model definitions first
+//
+// panicSourceFileNotExist 当源文件不存在时触发 panic
+// gormcngen 使用基于 AST 的代码注入，需要源文件已存在
+// 通过清晰的 panic 信息帮助用户理解需要先创建包含模型定义的文件
+func panicSourceFileNotExist(srcPath string, pkgName string) {
+	zaplog.SUG.Debugln("Maybe you need this command to create the source file:")
+	zaplog.SUG.Debugf(`echo "package %s" > %s`, pkgName, srcPath)
+	zaplog.SUG.Debugln("Maybe it helps you to solve this problem")
+	// Target file must exist before code injection. Create the file with your model struct definition first.
+	// 目标文件必须存在才能注入代码。请先创建包含模型结构体定义的文件。
+	zaplog.LOG.Panic("gormcngen requires existing source file to enable AST-based code injection",
+		zap.String("srcPath", srcPath),
+		zap.String("package", pkgName),
+	)
 }

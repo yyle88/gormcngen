@@ -9,24 +9,24 @@ package models
 
 import "github.com/yyle88/gormcnm"
 
-type User struct {
+type Account struct {
 	ID   uint
 	Name string
 }
 
-func (*User) TableName() string {
-	return "users"
+func (*Account) TableName() string {
+	return "accounts"
 }
 
-func (*User) Columns() *UserColumns {
-	return &UserColumns{
+func (*Account) Columns() *AccountColumns {
+	return &AccountColumns{
 		// Auto-generated: column names and types mapping. DO NOT EDIT. // 自动生成：列名和类型映射。请勿编辑。
 		ID:   "id",
 		Name: "name",
 	}
 }
 
-type UserColumns struct {
+type AccountColumns struct {
 	// Auto-generated: embedding operation functions to make it simple to use. DO NOT EDIT. // 自动生成：嵌入操作函数便于使用。请勿编辑。
 	gormcnm.ColumnOperationClass
 	// Auto-generated: column names and types in database table. DO NOT EDIT. // 自动生成：数据库表的列名和类型。请勿编辑。
@@ -34,33 +34,33 @@ type UserColumns struct {
 	Name gormcnm.ColumnName[string]
 }
 
-type Order struct {
+type Purchase struct {
 	ID          uint
-	UserID      uint
+	AccountID   uint
 	ProductName string
 	Amount      float64
 }
 
-func (*Order) TableName() string {
-	return "orders"
+func (*Purchase) TableName() string {
+	return "purchases"
 }
 
-func (*Order) Columns() *OrderColumns {
-	return &OrderColumns{
+func (*Purchase) Columns() *PurchaseColumns {
+	return &PurchaseColumns{
 		// Auto-generated: column names and types mapping. DO NOT EDIT. // 自动生成：列名和类型映射。请勿编辑。
 		ID:          "id",
-		UserID:      "user_id",
+		AccountID:   "account_id",
 		ProductName: "product_name",
 		Amount:      "amount",
 	}
 }
 
-type OrderColumns struct {
+type PurchaseColumns struct {
 	// Auto-generated: embedding operation functions to make it simple to use. DO NOT EDIT. // 自动生成：嵌入操作函数便于使用。请勿编辑。
 	gormcnm.ColumnOperationClass
 	// Auto-generated: column names and types in database table. DO NOT EDIT. // 自动生成：数据库表的列名和类型。请勿编辑。
 	ID          gormcnm.ColumnName[uint]
-	UserID      gormcnm.ColumnName[uint]
+	AccountID   gormcnm.ColumnName[uint]
 	ProductName gormcnm.ColumnName[string]
 	Amount      gormcnm.ColumnName[float64]
 }

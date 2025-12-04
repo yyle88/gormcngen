@@ -1,3 +1,10 @@
+// Package gormcngen_test validates CodeGenerationConfig with multi-model code generation
+// Auto tests intelligent code injection and smart updates
+// Demonstrates type-safe column struct and Columns() method generation
+//
+// gormcngen_test 验证 CodeGenerationConfig 的多模型代码生成
+// 自动测试智能代码注入和增量更新
+// 演示类型安全的列结构体和 Columns() 方法生成
 package gormcngen_test
 
 import (

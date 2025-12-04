@@ -8,14 +8,19 @@ import (
 	"github.com/yyle88/runpath/runtestpath"
 )
 
+// TestGenerate triggers column code generation using gormcngen
+// Configures generation options with custom method argument name
+//
+// TestGenerate 使用 gormcngen 触发列代码生成
+// 配置生成选项使用自定义方法接收者名称
 func TestGenerate(t *testing.T) {
 	absPath := osmustexist.FILE(runtestpath.SrcPath(t))
 	t.Log(absPath)
 
 	options := gormcngen.NewOptions().
-		WithColumnClassExportable(true). //中间类型名称的样式为可导出的 PersonColumns
-		WithColumnsMethodRecvName("one").
-		WithColumnsCheckFieldType(true) //这是新特性，非常建议启用
+		WithColumnClassExportable(true).  // Exportable class names like PersonColumns // 可导出的类名如 PersonColumns
+		WithColumnsMethodRecvName("one"). // Custom method argument name // 自定义方法接收者名称
+		WithColumnsCheckFieldType(true)   // Enable field type checking // 启用字段类型检查
 
 	cfg := gormcngen.NewConfigs([]interface{}{&Person{}, &Example{}}, options, absPath)
 	cfg.Gen()

@@ -8,15 +8,20 @@ import (
 	"github.com/yyle88/runpath/runtestpath"
 )
 
+// TestGenerate triggers column code generation using gormcngen
+// Configures generation options with Chinese tag name support
+//
+// TestGenerate 使用 gormcngen 触发列代码生成
+// 配置生成选项以支持中文标签名
 func TestGenerate(t *testing.T) {
 	absPath := osmustexist.FILE(runtestpath.SrcPath(t))
 	t.Log(absPath)
 
 	options := gormcngen.NewOptions().
-		WithColumnClassExportable(true). //中间类型名称的样式为可导出的 StudentColumns
-		WithColumnsMethodRecvName("c").  //设置列方法的接收器名称
-		WithColumnsCheckFieldType(true). //这是新特性，非常建议启用
-		WithUseTagName(true)
+		WithColumnClassExportable(true). // Exportable class names like StudentColumns // 可导出的类名如 StudentColumns
+		WithColumnsMethodRecvName("c").  // Set method argument name // 设置方法接收者名称
+		WithColumnsCheckFieldType(true). // Enable field type checking // 启用字段类型检查
+		WithUseTagName(true)             // Enable cnm tag name usage // 启用 cnm 标签名使用
 
 	cfg := gormcngen.NewConfigs([]interface{}{
 		&Student{},

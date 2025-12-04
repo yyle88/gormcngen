@@ -1,3 +1,10 @@
+// Package example3 demonstrates SQL keyword column name handling
+// Shows safe escaping of reserved words like CREATE, SELECT, UPDATE, DELETE
+// Used to showcase SafeCnm method and SQL keyword protection
+//
+// example3 演示 SQL 关键字列名处理
+// 展示 CREATE、SELECT、UPDATE、DELETE 等保留字的安全转义
+// 用于展示 SafeCnm 方法和 SQL 关键字保护
 package example3
 
 import (
@@ -48,8 +55,8 @@ func TestMain(m *testing.M) {
 	m.Run()
 }
 
-// TestSelect demonstrates handling SQL keyword column names safely
-// Uses SafeCnm to properly escape reserved words like CREATE, SELECT, UPDATE, DELETE
+// TestSelect demonstrates handling SQL keyword column names with escaping
+// Uses SafeCnm to escape reserved words like CREATE, SELECT, UPDATE, DELETE
 //
 // TestSelect 演示安全处理 SQL 关键字列名
 // 使用 SafeCnm 正确转义 CREATE、SELECT、UPDATE、DELETE 等保留字

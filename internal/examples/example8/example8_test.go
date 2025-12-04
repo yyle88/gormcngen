@@ -1,3 +1,10 @@
+// Package example8 demonstrates extended column generation with TableName method
+// Shows enhanced matching validation and advanced configuration options
+// Used to showcase namespace pattern with custom table names
+//
+// example8 演示带有 TableName 方法的扩展列生成
+// 展示增强查询一致性验证和高级配置选项
+// 用于展示带有自定义表名的命名空间模式
 package example8
 
 import (
@@ -64,8 +71,8 @@ func TestMain(m *testing.M) {
 	m.Run()
 }
 
-// TestExample validates consistency between traditional and enhanced column queries
-// Ensures both query approaches produce identical results with extended features
+// TestExample validates matching between native and enhanced column queries
+// Ensures both approaches produce same results with extended features
 //
 // TestExample 验证传统和增强列查询的一致性
 // 确保两种查询方法在扩展功能下产生相同的结果
@@ -74,12 +81,12 @@ func TestExample(t *testing.T) {
 	// 执行两种查询方法并比较结果
 	expected0Text := neatjsons.S(selectFunc0(t, caseDB))
 	expected1Text := neatjsons.S(selectFunc1(t, caseDB))
-	// Verify results are identical with enhanced configurations
+	// Confirm results are the same with enhanced configurations
 	// 验证在增强配置下结果相同
 	require.Equal(t, expected0Text, expected1Text)
 }
 
-// selectFunc0 demonstrates conventional raw SQL query method
+// selectFunc0 demonstrates native SQL statement method
 // Baseline implementation using string literals for comparison
 //
 // selectFunc0 演示常规的原生 SQL 查询方法
@@ -108,7 +115,7 @@ type UserOrder struct {
 // selectFunc1 演示增强的类型安全列查询方法
 // 带有扩展列生成特性的高级实现
 func selectFunc1(t *testing.T, db *gorm.DB) []*UserOrder {
-	// Initialize models and get their decorated columns
+	// Initialize models and get the decorated columns
 	// 初始化模型并获取其装饰列
 	user := &models.User{}
 	userColumns := user.TableColumns(gormcnm.NewTableDecoration(user.TableName()))

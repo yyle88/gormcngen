@@ -1,3 +1,10 @@
+// Package example5 demonstrates column generation with custom method configurations
+// Shows custom method names and multiple model column generation testing
+// Used to showcase configurable column generation options
+//
+// example5 演示自定义方法配置的列生成
+// 展示自定义方法名和多模型列生成测试
+// 用于展示可配置的列生成选项
 package example5
 
 import (

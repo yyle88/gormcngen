@@ -1,3 +1,10 @@
+// Package example6 demonstrates enhanced column generation with TableColumns method
+// Shows table decoration support and advanced column generation features
+// Used to showcase isGenFuncTableColumns option and extended features
+//
+// example6 演示带有 TableColumns 方法的增强列生成
+// 展示表装饰支持和高级列生成特性
+// 用于展示 isGenFuncTableColumns 选项和扩展功能
 package example6
 
 import (

@@ -1,3 +1,10 @@
+// Package example4 demonstrates Chinese column name support and cnm tag usage
+// Shows type-safe Chinese column references and multi-language field names
+// Used to showcase native language column naming and joined queries
+//
+// example4 演示中文列名支持和 cnm 标签使用
+// 展示类型安全的中文列引用和多语言字段名
+// 用于展示原生语言列命名和关联查询
 package example4
 
 import (
@@ -110,8 +117,8 @@ func TestSelect_x3x(t *testing.T) {
 	require.ErrorIs(t, err, gorm.ErrRecordNotFound)
 }
 
-// TestSelect_x4x demonstrates complex relational query with Chinese columns
-// Shows querying classes and their associated students using Chinese field names
+// TestSelect_x4x demonstrates complex joined queries with Chinese columns
+// Shows class and student association queries using Chinese field names
 //
 // TestSelect_x4x 演示使用中文列的复杂关联查询
 // 展示使用中文字段名查询班级及其关联学生

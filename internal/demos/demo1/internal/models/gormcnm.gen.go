@@ -1,6 +1,6 @@
 // Code generated using gormcngen. DO NOT EDIT.
 // This file was auto generated via github.com/yyle88/gormcngen
-// Generated from: gormcnm.gen_test.go:29 -> models.TestGenerate
+// Generated from: gormcnm.gen_test.go:34 -> models.TestGenerate
 // ========== GORMCNGEN:DO-NOT-EDIT-MARKER:END ==========
 
 package models

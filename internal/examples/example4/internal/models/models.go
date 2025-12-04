@@ -1,3 +1,10 @@
+// Package models demonstrates native language field naming with cnm tag support
+// Auto contains Student and Class structs with Chinese field aliases
+// Used to showcase custom tag-based column name generation patterns
+//
+// models 包演示使用 cnm 标签支持的原生语言字段命名
+// 自动包含带有中文字段别名的 Student 和 Class 结构体
+// 用于展示基于自定义标签的列名生成模式
 package models
 
 type SexType string

@@ -9,23 +9,28 @@ import (
 	"github.com/yyle88/runpath/runtestpath"
 )
 
-// 这句能让你的代码配合 go generate ./... 执行，假如不需要可以删除这句注释
+// TestGenerate triggers column code generation for demo1 models
+// Allows integration with go generate ./... for build automation
+//
+// TestGenerate 为 demo1 模型触发列代码生成
+// 支持与 go generate ./... 集成以实现构建自动化
 //
 //go:generate go test -v -run TestGenerate
 func TestGenerate(t *testing.T) {
-	absPath := runtestpath.SrcPath(t) //根据当前测试文件的路径找到其对应的源文件路径
+	// Get source file path from test file location // 从测试文件位置获取源文件路径
+	absPath := runtestpath.SrcPath(t)
 	t.Log(absPath)
 
-	//出于安全起见，需要需要判断目标文件是已经存在的，需要手动创建该文件，让代码能找到此文件
+	// Confirm target file exists // 确认目标文件存在
 	require.True(t, osmustexist.IsFile(absPath))
 
-	//在这里写下你要生成的 models 的对象列表，指针类型或非指针类型都是可以的，选中生成模型
+	// Define models to generate columns for // 定义要生成列的模型
 	objects := []any{&Example{}}
 
 	options := gormcngen.NewOptions().
-		WithColumnClassExportable(true). //中间类型名称的样式为可导出的 ExampleColumns
-		WithEmbedColumnOperations(false)
+		WithColumnClassExportable(true). // Exportable class names like ExampleColumns // 可导出的类名如 ExampleColumns
+		WithEmbedColumnOperations(false) // Disable embedding operations // 禁用嵌入操作
 
 	cfg := gormcngen.NewConfigs(objects, options, absPath)
-	cfg.Gen() //将会把生成后的代码写到目标位置，即 "gormcnm.gen.go" 这个文件里
+	cfg.Gen() // Write generated code to target file // 将生成的代码写入目标文件
 }

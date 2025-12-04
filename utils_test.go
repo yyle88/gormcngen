@@ -1,7 +1,18 @@
+// Package gormcngen tests validate position tracking utilities
+// Auto verifies GetGenPosFuncMark function with runtime caller info
+//
+// gormcngen 测试包验证位置追踪工具
+// 自动验证 GetGenPosFuncMark 函数与运行时调用者信息
 package gormcngen
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/stretchr/testify/require"
+)
 
 func TestGetGenPosFuncMark(t *testing.T) {
-	t.Log(GetGenPosFuncMark(0))
+	result := GetGenPosFuncMark(0)
+	require.NotEmpty(t, result)
+	t.Log("result:", result)
 }

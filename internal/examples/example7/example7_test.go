@@ -1,3 +1,10 @@
+// Package example7 demonstrates type-safe join queries with Chinese column names
+// Shows comparison between raw SQL and column-based query approaches
+// Used to showcase table decoration and complex join operations
+//
+// example7 演示带有中文列名的类型安全联接查询
+// 展示原生 SQL 和基于列的查询方法的对比
+// 用于展示表装饰和复杂联接操作
 package example7
 
 import (
@@ -65,21 +72,21 @@ func TestMain(m *testing.M) {
 }
 
 // TestExample demonstrates comparison between raw SQL and type-safe column queries
-// Compares traditional string-based queries with generated column-based queries
+// Compares native string-based queries with generated column-based queries
 //
 // TestExample 演示原生 SQL 和类型安全列查询的对比
 // 比较传统基于字符串的查询和生成的基于列的查询
 func TestExample(t *testing.T) {
-	// Execute traditional query and type-safe query
+	// Execute native and type-safe queries
 	// 执行传统查询和类型安全查询
 	expected0Text := neatjsons.S(selectFunc0(t, caseDB))
 	expected1Text := neatjsons.S(selectFunc1(t, caseDB))
-	// Ensure both results are identical
+	// Ensure both results are the same
 	// 确保两者结果相同
 	require.Equal(t, expected0Text, expected1Text)
 }
 
-// selectFunc0 demonstrates traditional raw SQL query approach
+// selectFunc0 demonstrates native SQL statement approach
 // Uses string literals for table names, column names, and joins
 //
 // selectFunc0 演示传统的原生 SQL 查询方法
@@ -103,12 +110,12 @@ type UserOrder struct {
 }
 
 // selectFunc1 demonstrates type-safe column-based query approach
-// Uses generated column structs with Chinese column names and type safety
+// Uses generated column structs with Chinese column names and type protection
 //
 // selectFunc1 演示类型安全的基于列的查询方法
 // 使用生成的列结构体和中文列名及类型安全
 func selectFunc1(t *testing.T, db *gorm.DB) []*UserOrder {
-	// Create model instances and get their table-decorated columns
+	// Create model instances and get the table-decorated columns
 	// 创建模型实例并获取带表装饰的列
 	user := &models.User{}
 	userColumns := user.TableColumns(gormcnm.NewTableDecoration(user.TableName()))

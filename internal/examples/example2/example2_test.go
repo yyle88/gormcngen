@@ -1,3 +1,10 @@
+// Package example2 demonstrates column-based query operations with GORM
+// Shows type-safe WHERE conditions, OR/AND combinations, and query expression building
+// Used to showcase advanced column operation chaining and query construction
+//
+// example2 演示基于列的 GORM 查询操作
+// 展示类型安全的 WHERE 条件、OR/AND 组合和查询表达式构建
+// 用于展示高级列操作链式调用和查询构建
 package example2
 
 import (

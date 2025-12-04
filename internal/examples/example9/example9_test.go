@@ -1,3 +1,10 @@
+// Package example9 demonstrates association field handling in column generation
+// Shows how association fields are skipped while maintaining relationship queries
+// Used to showcase GORM associations with pointer fields and foreignKey tags
+//
+// example9 演示列生成中的关联字段处理
+// 展示关联字段如何被跳过同时保持关系查询正常工作
+// 用于展示带有指针字段和 foreignKey 标签的 GORM 关联
 package example9
 
 import (
@@ -32,7 +39,7 @@ func TestMain(m *testing.M) {
 	}))
 	defer rese.F0(rese.P1(db.DB()).Close)
 
-	// Auto migrate both models with their association relationship
+	// Auto migrate both models with the association relationship
 	// 自动迁移两个模型及其关联关系
 	done.Done(db.AutoMigrate(&models.User{}, &models.Profile{}))
 
@@ -63,7 +70,7 @@ func TestMain(m *testing.M) {
 }
 
 // TestExample9 demonstrates association field handling in column generation
-// Validates that association fields are correctly skipped while maintaining proper column mappings
+// Validates that association fields are skipped as expected while maintaining correct column mappings
 //
 // TestExample9 演示列生成中的关联字段处理
 // 验证关联字段被正确跳过同时保持正确的列映射
@@ -74,14 +81,14 @@ func TestExample9(t *testing.T) {
 	userColumns := user.Columns()
 	t.Log("User columns:", neatjsons.S(userColumns))
 
-	// Verify User columns contain expected fields but not association field
+	// Confirm User columns contain expected fields but not association field
 	// 验证User列包含预期字段但不包含关联字段
 	userColumnsJSON := neatjsons.S(userColumns)
 	require.Contains(t, userColumnsJSON, `"ID"`)
 	require.Contains(t, userColumnsJSON, `"id"`)
 	require.Contains(t, userColumnsJSON, `"Name"`)
 	require.Contains(t, userColumnsJSON, `"name"`)
-	// Profile field should NOT appear in column mappings
+	// Profile field should NOT show in column mappings
 	// Profile字段不应出现在列映射中
 	require.NotContains(t, userColumnsJSON, "Profile")
 
@@ -101,7 +108,7 @@ func TestExample9(t *testing.T) {
 }
 
 // testBasicUserQuery tests basic User model queries using generated columns
-// Demonstrates that association fields don't interfere with normal column operations
+// Demonstrates that association fields don't interfere with standard column operations
 //
 // testBasicUserQuery 使用生成的列测试基础User模型查询
 // 演示关联字段不会干扰正常的列操作
@@ -111,7 +118,7 @@ func testBasicUserQuery(t *testing.T, db *gorm.DB) {
 	require.Greater(t, len(users), 0)
 	t.Log("Found users:", neatjsons.S(users))
 
-	// Verify we can use the generated column name for queries
+	// Confirm we can use the generated column name to run queries
 	// 验证我们可以使用生成的列名进行查询
 	user := &models.User{}
 	userColumns := user.Columns()
@@ -121,14 +128,14 @@ func testBasicUserQuery(t *testing.T, db *gorm.DB) {
 	require.Equal(t, "User1", foundUser.Name)
 	t.Log("Found user by name:", neatjsons.S(foundUser))
 
-	// Verify the column name mapping is correct
+	// Confirm the column name mapping is correct
 	// 验证列名映射是否正确
 	require.Equal(t, "name", string(userColumns.Name))
 	require.Equal(t, "id", string(userColumns.ID))
 }
 
 // testAssociationQuery tests GORM association queries
-// Demonstrates that association relationships work correctly even though fields are skipped in column generation
+// Demonstrates that association relationships work as expected even though fields are skipped in column generation
 //
 // testAssociationQuery 测试GORM关联查询
 // 演示即使字段在列生成中被跳过，关联关系仍然正常工作
@@ -139,7 +146,7 @@ func testAssociationQuery(t *testing.T, db *gorm.DB) {
 	require.NoError(t, db.Preload("Profile").Find(&users).Error)
 	require.Greater(t, len(users), 0)
 
-	// Verify association loading worked
+	// Confirm association loading succeeded
 	// 验证关联加载正常工作
 	for _, user := range users {
 		if user.Profile != nil {

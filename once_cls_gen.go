@@ -1,6 +1,6 @@
 // Package gormcngen: Schema-based configuration and single-use code generation
 // Handles single instance schema analysis and targeted code generation
-// Provides precise control of column struct generation and method creation
+// Provides precise management of column struct generation and method creation
 //
 // gormcngen: 基于 schema 的配置和单次使用代码生成
 // 处理单个模式 schema 分析和针对性代码生成
@@ -189,7 +189,7 @@ func (c *Config) Gen() *GenOutput {
 		}
 
 		var columnGoTypeName string
-		// Get the underlying type for pointer types to check package
+		// Get the base type when dealing with address types to check package
 		// 获取指针类型的底层类型来检查包
 		underlyingType := tern.BFF(field.FieldType.Kind() == reflect.Ptr, func() reflect.Type {
 			return field.FieldType.Elem()
@@ -198,7 +198,7 @@ func (c *Config) Gen() *GenOutput {
 		})
 
 		if pkgPath := underlyingType.PkgPath(); pkgPath == c.sch.ModelType.PkgPath() { // 如果在同一个包里
-			// For same package types, use simple name (Profile or *Profile)
+			// When types belong to same package, use simple name (Profile etc)
 			// 对于同包类型，使用简单名称（Profile 或 *Profile）
 			if field.FieldType.Kind() == reflect.Ptr {
 				columnGoTypeName = "*" + underlyingType.Name()
@@ -323,7 +323,7 @@ func ShowSchemaChinese(sch *schema.Schema) {
 	fmt.Println("---")
 }
 
-// ShowSchemaRelationshipsEnglish displays relationship information for educational and debugging purposes
+// ShowSchemaRelationshipsEnglish displays relationship information to demonstrate schema structure and assist debugging
 // ShowSchemaRelationshipsEnglish 显示关系信息，用于教学和调试目的
 func ShowSchemaRelationshipsEnglish(sch *schema.Schema) {
 	if len(sch.Relationships.Relations) == 0 {
@@ -353,7 +353,7 @@ func ShowSchemaRelationshipsEnglish(sch *schema.Schema) {
 	fmt.Println("---")
 }
 
-// ShowSchemaRelationshipsChinese displays relationship information in Chinese for educational and debugging purposes
+// ShowSchemaRelationshipsChinese displays relationship information in Chinese to demonstrate schema structure and assist debugging
 // ShowSchemaRelationshipsChinese 用中文显示关系信息，用于教学和调试目的
 func ShowSchemaRelationshipsChinese(sch *schema.Schema) {
 	if len(sch.Relationships.Relations) == 0 {
