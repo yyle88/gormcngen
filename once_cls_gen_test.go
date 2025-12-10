@@ -1,6 +1,6 @@
-// Package gormcngen_test validates SchemaConfig with single-model code generation
+// Package gormcngen_test validates SchemaConfig with one GORM struct code generation
 // Auto tests schema parsing, options configuration, and output generation
-// Demonstrates various generation modes including tag handling and field filtering
+// Demonstrates various generation modes including tag handling and field output
 //
 // gormcngen_test 验证 SchemaConfig 的单模型代码生成
 // 自动测试 schema 解析、选项配置和输出生成

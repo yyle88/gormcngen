@@ -12,7 +12,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/yyle88/done"
-	"github.com/yyle88/gormcngen/internal/demos/demo1/internal/models"
+	"github.com/yyle88/gormcngen/internal/demos/demo1x/internal/models"
 	"github.com/yyle88/neatjson/neatjsons"
 	"github.com/yyle88/rese"
 	"github.com/yyle88/zaplog"

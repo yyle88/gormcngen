@@ -27,7 +27,7 @@ import (
 	"gorm.io/gorm/schema"
 )
 
-// SchemaConfig holds configuration for generating column methods and structures from GORM models
+// SchemaConfig holds configuration used in generating column methods and structures from GORM models
 // Contains parsed schema information along with generation options and naming preferences
 // Manages the complete lifecycle from schema analysis to code output generation
 //
@@ -38,14 +38,14 @@ type SchemaConfig struct {
 	sch                    *schema.Schema // Parsed GORM schema from struct // 从模型结构体解析的 GORM schema
 	structName             string         // Generated column struct name // 生成的列结构体名称
 	methodName             string         // Generated Columns() method name // 生成的 Columns() 方法名称
-	methodNameTableColumns string
-	options                *Options // Generation configuration options // 生成行为配置选项
+	methodNameTableColumns string         // Generated TableColumns() method name // 生成的 TableColumns() 方法名称
+	options                *Options       // Generation configuration options // 生成行为配置选项
 }
 
 // NewSchemaConfig creates a SchemaConfig instance from a GORM structure and generation options
 // Parses the structure using GORM schema parsing and applies naming strategies
 // Initializes schema analysis, shows debug information, and configures generation parameters
-// Returns a configured SchemaConfig prepared for code generation
+// Returns a configured SchemaConfig prepared to generate code
 //
 // NewSchemaConfig 从 GORM 模型和生成选项创建 SchemaConfig 实例
 // 使用 GORM schema 解析器解析模型结构并应用命名策略
@@ -67,10 +67,15 @@ func NewSchemaConfig(object interface{}, options *Options) *SchemaConfig {
 	return NewConfig(sch, namingConfig, options)
 }
 
+// NamingConfig holds naming conventions used in generated code elements
+// Contains struct name and method names used in code generation output
+//
+// NamingConfig 保存生成代码元素的命名约定
+// 包含代码生成输出中使用的结构体名称和方法名称
 type NamingConfig struct {
-	StructName             string
-	MethodNameColumns      string
-	MethodNameTableColumns string
+	StructName             string // Generated column struct name // 生成的列结构体名称
+	MethodNameColumns      string // Columns() method name // Columns() 方法名称
+	MethodNameTableColumns string // TableColumns() method name // TableColumns() 方法名称
 }
 
 func NewNamingConfig(sch *schema.Schema, options *Options) *NamingConfig {
@@ -108,10 +113,10 @@ func NewConfig(sch *schema.Schema, namingConfig *NamingConfig, options *Options)
 // GenOutput Structure representing the generated method and struct code with package imports.
 // GenOutput 表示生成的方法和结构体代码，以及涉及的包导入信息。
 type GenOutput struct {
-	methodCode             string // Code for the generated method. // 生成的方法代码。
-	methodTableColumnsCode string
-	structCode             string          // Code for the generated structure. // 生成的结构体代码。
-	pkgImports             map[string]bool // Package imports required. // 生成的代码需要导入的的包。
+	methodCode             string          // Generated Columns() method code // 生成的 Columns() 方法代码
+	methodTableColumnsCode string          // Generated TableColumns() method code // 生成的 TableColumns() 方法代码
+	structCode             string          // Generated structure code // 生成的结构体代码
+	pkgImports             map[string]bool // Package imports needed // 生成的代码需要导入的包
 }
 
 func (x *GenOutput) GetMethodCode() string {
@@ -257,8 +262,8 @@ func (c *Config) Gen() *GenOutput {
 	}
 }
 
-// Resolves the new field name based on tags and options.
-// 根据标签和选项解析新字段名称。
+// resolveNewFieldName resolves the new field name based on tags and options.
+// resolveNewFieldName 根据标签和选项解析新字段名称。
 func (c *Config) resolveNewFieldName(field *schema.Field) (string, bool) {
 	if c.options.useTagName {
 		var tagKeyName = zerotern.VV(c.options.tagKeyName, "cnm")

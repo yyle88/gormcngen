@@ -1,7 +1,7 @@
 [![GitHub Workflow Status (branch)](https://img.shields.io/github/actions/workflow/status/yyle88/gormcngen/release.yml?branch=main&label=BUILD)](https://github.com/yyle88/gormcngen/actions/workflows/release.yml?query=branch%3Amain)
 [![GoDoc](https://pkg.go.dev/badge/github.com/yyle88/gormcngen)](https://pkg.go.dev/github.com/yyle88/gormcngen)
 [![Coverage Status](https://img.shields.io/coveralls/github/yyle88/gormcngen/main.svg)](https://coveralls.io/github/yyle88/gormcngen?branch=main)
-[![Supported Go Versions](https://img.shields.io/badge/Go-1.22+-lightgrey.svg)](https://go.dev/)
+[![Supported Go Versions](https://img.shields.io/badge/Go-1.24+-lightgrey.svg)](https://go.dev/)
 [![GitHub Release](https://img.shields.io/github/release/yyle88/gormcngen.svg)](https://github.com/yyle88/gormcngen/releases)
 [![Go Report Card](https://goreportcard.com/badge/github.com/yyle88/gormcngen)](https://goreportcard.com/report/github.com/yyle88/gormcngen)
 
@@ -32,31 +32,15 @@ Like `SQLAlchemy` in the Python ecosystem, which allows developers to access col
 
 ---
 
-## Core Features
+## Language Ecosystem Comparison
 
-### 🔍 AST-Grade Precision
-- **Deep model analysis**: Parses struct fields, tags, and embedded types
-- **GORM tag extraction**: Auto detects column names, types, and constraints
-- **Embedded field support**: Handles `gorm.Model` and custom embedded structs
-- **Type preservation**: Maintains exact Go types in generated code
+| Language   | ORM          | Type-Safe Columns  | Example                                 |
+|------------|--------------|--------------------|-----------------------------------------|
+| **Java**   | MyBatis Plus | `Example::getName` | `wrapper.eq(Example::getName, "alice")` |
+| **Python** | SQLAlchemy   | `Example.name`     | `query.filter(Example.name == "alice")` |
+| **Go**     | **GORMCNGEN** | `cls.Name.Eq()`    | `db.Where(cls.Name.Eq("alice"))`        |
 
-### 🚀 Smart Code Generation
-- **Perfect synchronization**: Generated code always matches the models
-- **Custom column names**: Respects `gorm:"column:name"` tags
-- **Native language support**: Works with `cnm:"中文名"` tags to enable multi-language development
-- **Smart updates**: Regenerates just what changed
-
-### 🛠️ Development Experience
-- **Simple programming API**: Simple Go API with immediate results
-- **IDE integration**: Generated code provides complete IntelliSense support
-- **Build system compatible**: Simple integration with `go:generate` directives
-- **Version management safe**: Deterministic output with clean diffs
-
-### 🏢 Enterprise Grade
-- **Large codebase support**: Handles hundreds of models with ease
-- **Custom naming conventions**: Configurable output patterns
-- **Validation and protection**: Built-in checks prevent invalid generation
-- **Documentation generation**: Auto-generated comments explain column mappings
+---
 
 ## Installation
 
@@ -87,10 +71,10 @@ Create `internal/models/models.go`:
 ```go
 package models
 
-type User struct {
+type Account struct {
     ID       uint   `gorm:"primaryKey"`
     Username string `gorm:"uniqueIndex;size:100"`
-    Email    string `gorm:"index;size:255"`
+    Mailbox  string `gorm:"index;size:255"`
     Age      int    `gorm:"column:age"`
     IsActive bool   `gorm:"default:true"`
 }
@@ -101,10 +85,10 @@ type User struct {
 Create the target file to hold generated code and the test file containing generation logic:
 
 ```bash
-# Create target file for generated code with package declaration
+# Create target file to hold generated code with package declaration
 echo "package models" > internal/models/ngen.go
 
-# Create test file for generation logic with package declaration
+# Create test file containing generation logic with package declaration
 echo "package models" > internal/models/ngen_test.go
 ```
 
@@ -138,9 +122,9 @@ func TestGenerate(t *testing.T) {
         WithColumnsMethodRecvName("c").
         WithColumnsCheckFieldType(true)
     
-    // Define models to generate for
+    // Define models to process
     models := []interface{}{
-		&User{},
+		&Account{},
 	}
     
     // Create config and generate
@@ -174,21 +158,21 @@ The generated `ngen.go` contains:
 // Generated from: ngen_test.go:20 -> models.TestGenerate
 // ========== GORMCNGEN:DO-NOT-EDIT-MARKER:END ==========
 
-func (c *User) Columns() *UserColumns {
-    return &UserColumns{
+func (c *Account) Columns() *AccountColumns {
+    return &AccountColumns{
         ID:       gormcnm.Cnm(c.ID, "id"),
         Username: gormcnm.Cnm(c.Username, "username"),
-        Email:    gormcnm.Cnm(c.Email, "email"),
+        Mailbox:  gormcnm.Cnm(c.Mailbox, "mailbox"),
         Age:      gormcnm.Cnm(c.Age, "age"),
         IsActive: gormcnm.Cnm(c.IsActive, "is_active"),
     }
 }
 
-type UserColumns struct {
+type AccountColumns struct {
     gormcnm.ColumnOperationClass
     ID       gormcnm.ColumnName[uint]
     Username gormcnm.ColumnName[string]
-    Email    gormcnm.ColumnName[string]
+    Mailbox  gormcnm.ColumnName[string]
     Age      gormcnm.ColumnName[int]
     IsActive gormcnm.ColumnName[bool]
 }
@@ -201,21 +185,15 @@ type UserColumns struct {
 Now when writing business code, you can use the generated type-safe column methods to build database queries:
 
 ```go
-var user User
-cls := user.Columns()
+var account Account
+cls := account.Columns()
 
 // Perfect type protection with zero boilerplate
 err := db.Where(cls.Username.Eq("alice")).
          Where(cls.Age.Gte(18)).
          Where(cls.IsActive.Eq(true)).
-         First(&user).Error
+         First(&account).Error
 ```
-
-✨ **Benefits of this approach:**
-- **Compile-time protection**: Typos in column names become compilation errors
-- **IDE intelligence**: Complete autocomplete and refactoring support  
-- **Zero boilerplate**: No hand-written column name management required
-- **Always synchronized**: Generated code stays in sync with the models auto
 
 ### Advanced Usage
 
@@ -239,7 +217,7 @@ advancedOptions := gormcngen.NewOptions().
     WithIsGenFuncTableColumns(true)            // Generate TableColumns function
 
 // Batch processing multiple models
-allModels := []interface{}{&User{}, &Product{}, &Item{}, &Client{}}
+allModels := []interface{}{&Account{}, &Product{}, &Item{}, &Client{}}
 configs := gormcngen.NewConfigs(allModels, options, "models_gen.go")
 configs.WithIsGenPreventEdit(true)  // Add "DO NOT EDIT" headers to generated files
 configs.WithGeneratedFromPos(gormcngen.GetGenPosFuncMark(0))  // Show generation source location (default: show)
@@ -271,7 +249,7 @@ type ProductColumns struct {
     // The column names and types of the model's columns
     ID       gormcnm.ColumnName[uint]
     Name     gormcnm.ColumnName[string]           // Maps to "name"
-    V产品名称   gormcnm.ColumnName[string]           // Chinese alias for Name field  
+    V产品名称   gormcnm.ColumnName[string]           // Chinese alias mapping to Name field
     Price    gormcnm.ColumnName[decimal.Decimal]
     CategoryID gormcnm.ColumnName[uint]
     CreatedAt gormcnm.ColumnName[time.Time]
@@ -282,7 +260,7 @@ func (*Product) Columns() *ProductColumns {
     return &ProductColumns{
         ID:       "id",
         Name:     "name",
-        V产品名称:   "name",      // Chinese alias for same column
+        V产品名称:   "name",      // Chinese alias pointing to same column
         Price:    "price",
         CategoryID: "category_id",
         CreatedAt: "created_at",
@@ -325,9 +303,9 @@ import (
 )
 
 func main() {
-    models := []interface{}{&models.User{}}
+    models := []interface{}{&models.Account{}}
     options := gormcngen.NewOptions()
-    configs := gormcngen.NewConfigs(models, options, "models/user_columns_gen.go")
+    configs := gormcngen.NewConfigs(models, options, "models/account_columns_gen.go")
     configs.Gen()
 }
 ```
@@ -337,64 +315,54 @@ Then use in the target files:
 ```go
 //go:generate go run scripts/generate_columns.go
 
-type User struct {
+type Account struct {
     ID       uint   `gorm:"primaryKey"`
     Username string `gorm:"uniqueIndex"`
-    Email    string `gorm:"index"`
+    Mailbox  string `gorm:"index"`
 }
 ```
 
-## Integration with GORM Repo Pattern
+## 🔗 Using with gormrepo
+
+Combine **gormcngen** with **[gormrepo](https://github.com/yyle88/gormrepo)** to get type-safe CRUD operations.
+
+### Quick Preview
 
 ```go
-// Generated columns integrate with gormrepo
-repo := gormrepo.NewRepo(gormclass.Use(&Product{}))
+// Create repo with columns
+repo := gormrepo.NewRepo(&Account{}, (&Account{}).Columns())
 
-products, total, err := repo.Repo(db).FindPageAndCount(
-    func(db *gorm.DB, cls *ProductColumns) *gorm.DB {
-        // Can use English field name
-        return db.Where(cls.Name.Like("%computer%")).
-               Where(cls.Price.Between(1000, 5000))
-        // Also supports Chinese alias field access to same column
-        // return db.Where(cls.V产品名称.Like("%电脑%")).
-        //        Where(cls.Price.Between(1000, 5000))
+// Concise approach with gormrepo/gormclass
+repo := gormrepo.NewRepo(gormclass.Use(&Account{}))
+
+// Type-safe queries
+account, err := repo.With(ctx, db).First(func(db *gorm.DB, cls *AccountColumns) *gorm.DB {
+    return db.Where(cls.Username.Eq("alice"))
+})
+
+// Find with conditions
+accounts, err := repo.With(ctx, db).Find(func(db *gorm.DB, cls *AccountColumns) *gorm.DB {
+    return db.Where(cls.Age.Gte(18)).Where(cls.Age.Lte(65))
+})
+
+// Type-safe updates
+err := repo.With(ctx, db).Updates(
+    func(db *gorm.DB, cls *AccountColumns) *gorm.DB {
+        return db.Where(cls.ID.Eq(1))
     },
-    func(cls *ProductColumns) gormcnm.OrderByBottle {
-        return cls.Price.OrderByBottle("DESC")
+    func(cls *AccountColumns) map[string]interface{} {
+        return cls.Kw(cls.Age.Kv(26)).Kw(cls.Nickname.Kv("NewNick")).AsMap()
     },
-    &gormrepo.Pagination{Limit: 20, Offset: 0},
 )
 ```
 
----
-
-**This is a simple method to setup and use `gormcngen` to generate the `Columns()` function with GORM models, enabling you to build queries with column names in different languages.**
+👉 See **[gormrepo](https://github.com/yyle88/gormrepo)** to get complete documentation and more examples.
 
 ---
 
 ## Examples
 
-See [examples](internal/examples) and [demos](internal/demos) directories for:
-- Basic generation examples
-- Chinese field handling examples
-- Batch processing examples
-- Custom configuration examples
-- Database operation examples
-
-## Benefits Versus Static Column Definitions
-
-| Aspect | Static Definitions | GORMCNGEN |
-|--------|-------------------|-----------|
-| **Setup Time** | ⏰ Hours of hand-written typing | ⚡ Seconds with programming API |
-| **Precision** | ❌ Prone to typos and mistakes | ✅ 100% accurate AST parsing |
-| **Synchronization** | ❌ Hand-written updates required | ✅ Always in sync with models |
-| **Type Protection** | 🟡 Depends on hand-written precision | ✅ Perfect type preservation |
-| **Embedded Fields** | ❌ Complex hand-written handling | ✅ Automatic detection |
-| **Native Language** | ❌ Hand-written tag mapping | ✅ Intelligent tag processing |
-| **Large Codebases** | 😫 Maintenance nightmare | 🚀 Works at scale |
-| **Team Performance** | 🐌 Slow and error-prone | ⚡ Fast and reliable |
-
----
+See [examples](internal/examples) and [demos](internal/demos) directories.
 
 ## Related Projects
 
@@ -403,7 +371,7 @@ Explore the complete GORM ecosystem with these integrated packages:
 ### Core Ecosystem
 
 - **[gormcnm](https://github.com/yyle88/gormcnm)** - GORM foundation providing type-safe column operations and query builders
-- **[gormcngen](https://github.com/yyle88/gormcngen)** - Code generation tool using AST for type-safe GORM operations (this project)
+- **[gormcngen](https://github.com/yyle88/gormcngen)** - Code generation using AST enabling type-safe GORM operations (this project)
 - **[gormrepo](https://github.com/yyle88/gormrepo)** - Repository pattern implementation with GORM best practices
 - **[gormmom](https://github.com/yyle88/gormmom)** - Native language GORM tag generation engine with smart column naming
 - **[gormzhcn](https://github.com/go-zwbc/gormzhcn)** - Complete Chinese programming interface with GORM
@@ -477,4 +445,3 @@ Welcome to contribute to this project via submitting merge requests and reportin
 ## 📈 GitHub Stars
 
 [![starring](https://starchart.cc/yyle88/gormcngen.svg?variant=adaptive)](https://starchart.cc/yyle88/gormcngen)
-

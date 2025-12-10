@@ -1,4 +1,4 @@
-// Package gormcngen_test validates CodeGenerationConfig with multi-model code generation
+// Package gormcngen_test validates CodeGenerationConfig with multiple GORM models
 // Auto tests intelligent code injection and smart updates
 // Demonstrates type-safe column struct and Columns() method generation
 //
@@ -29,6 +29,11 @@ type Demo struct {
 	Type string `gorm:"type:varchar(100);" cnm:"V类型"`
 }
 
+// TestConfigs_Generate tests code generation with multiple GORM models
+// Validates that Columns() methods and column structs are generated correctly
+//
+// TestConfigs_Generate 测试多个 GORM 模型的代码生成
+// 验证 Columns() 方法和列结构体能正确生成
 func TestConfigs_Generate(t *testing.T) {
 	path := runpath.Path()
 	t.Log(path)

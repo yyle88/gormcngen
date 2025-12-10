@@ -1,9 +1,9 @@
 // Package gormcngen tests validate position tracking utilities
-// Auto verifies GetGenPosFuncMark function with runtime caller info
+// Auto verifies GetGenPosFuncMark function with runtime invocation info
 //
 // gormcngen 测试包验证位置追踪工具
 // 自动验证 GetGenPosFuncMark 函数与运行时调用者信息
-package gormcngen
+package utils
 
 import (
 	"testing"

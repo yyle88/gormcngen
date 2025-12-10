@@ -33,24 +33,24 @@ import (
 	"golang.org/x/exp/maps"
 )
 
-// CodeGenerationConfig defines the configuration for intelligent code generation
-// Contains schema configurations and output paths for AST-based code generation
+// CodeGenerationConfig defines the configuration used in intelligent code generation
+// Contains schema configurations and output paths used in AST-based code generation
 // Manages the entire code generation workflow from analysis to output
 //
 // CodeGenerationConfig 定义智能代码生成的配置
 // 包含基于 AST 代码生成的 schema 配置和输出路径
 // 管理从分析到输出的整个代码生成工作流
 type CodeGenerationConfig struct {
-	schemas          []*SchemaConfig // Schema configurations for code generation // 用于代码生成的 schema 配置
-	methodOutputPath string          // Output path for generated method code // 生成方法代码的输出路径
-	structOutputPath string          // Output path for generated struct code // 生成结构体代码的输出路径
+	schemas          []*SchemaConfig // Schema configurations used in code generation // 用于代码生成的 schema 配置
+	methodOutputPath string          // Output path of generated method code // 生成方法代码的输出路径
+	structOutputPath string          // Output path of generated struct code // 生成结构体代码的输出路径
 	isGenPreventEdit bool            // Generate "DO NOT EDIT" comment headers // 是否生成"请勿编辑"注释头部
 	generatedFromPos string          // Position where code generation was triggered // 代码生成的触发位置
 }
 
 // NewCodeGenerationConfig creates a new instance of CodeGenerationConfig
-// Initializes configuration with provided schema definitions for code generation
-// Returns a configured instance prepared for method and struct path specification
+// Initializes configuration with provided schema definitions used in code generation
+// Returns a configured instance, which is then used to set method and struct output paths
 //
 // NewCodeGenerationConfig 创建一个新的 CodeGenerationConfig 实例
 // 使用提供的 schema 定义初始化代码生成配置
@@ -60,12 +60,12 @@ func NewCodeGenerationConfig(schemas []*SchemaConfig) *CodeGenerationConfig {
 		schemas:          schemas,
 		methodOutputPath: "",
 		structOutputPath: "",
-		isGenPreventEdit: true,                 // Default true to add DO NOT EDIT comment // 默认为 true，添加请勿编辑注释
-		generatedFromPos: GetGenPosFuncMark(2), // Auto capture position for code references // 自动捕获位置以便代码引用
+		isGenPreventEdit: true,                       // Default true, adds DO NOT EDIT comment // 默认为 true，添加请勿编辑注释
+		generatedFromPos: utils.GetGenPosFuncMark(2), // Auto capture position, used in code references // 自动捕获位置以便代码引用
 	}
 }
 
-// Configs is an alias for CodeGenerationConfig, used for code generation tasks.
+// Configs is an alias of CodeGenerationConfig, used in code generation tasks
 // Configs 是 CodeGenerationConfig 的别名，用于代码生成任务
 type Configs = CodeGenerationConfig
 
@@ -81,9 +81,9 @@ func NewConfigs(models []interface{}, options *Options, outputPath string) *Conf
 		WithStructOutputPath(outputPath)
 }
 
-// WithMethodOutputPath specifies the output path for generated method code
+// WithMethodOutputPath specifies the output path of generated method code
 // Configures where Columns() methods are written during code generation
-// Returns the configuration instance for method chaining
+// Returns the configuration instance, enabling method chaining
 //
 // WithMethodOutputPath 指定生成方法代码的输出路径
 // 配置 Columns() 方法在代码生成过程中的写入位置
@@ -93,9 +93,9 @@ func (cfg *Configs) WithMethodOutputPath(path string) *Configs {
 	return cfg
 }
 
-// WithStructOutputPath specifies the output path for generated struct code
+// WithStructOutputPath specifies the output path of generated struct code
 // Configures where column struct definitions are written during code generation
-// Returns the configuration instance for method chaining
+// Returns the configuration instance, enabling method chaining
 //
 // WithStructOutputPath 指定生成结构体代码的输出路径
 // 配置列结构体定义在代码生成过程中的写入位置
@@ -133,7 +133,7 @@ func (cfg *Configs) WithGeneratedFromPos(generatedFromPos string) *Configs {
 
 // Generate triggers the intelligent code generation process
 // Executes the complete AST-based code generation workflow
-// Convenience method that calls Gen() for enhanced API ergonomics
+// Convenience method that calls Gen() with enhanced API design
 //
 // Generate 触发智能代码生成过程
 // 执行完整的基于 AST 的代码生成工作流
@@ -316,7 +316,7 @@ func (cfg *Configs) Gen() {
 		}
 	}
 
-	// Apply changes to the source code for each file based on the collected edit elements. // 根据收集的编辑元素更新每个文件的源代码
+	// Update source code of each file based on collected edit elements // 根据收集的编辑元素更新每个文件的源代码
 	for _, elem := range editingElements {
 		tuple := path2codeMap[elem.sourcePath]
 		if elem.exist { // If the code block exists, replace it with the new content. // 如果代码块已存在，用新内容替换它
@@ -326,7 +326,7 @@ func (cfg *Configs) Gen() {
 			codeBlockBytes := []byte(elem.newSourceBlock)
 			tuple.sourceCode = append(tuple.sourceCode, codeBlockBytes...)
 		}
-		// Add any required imports. // 添加所需的导入包
+		// Add required imports to the set // 添加所需的导入包
 		for pkgPath := range elem.pkgImports {
 			tuple.pkgImports[pkgPath] = true
 		}
@@ -341,7 +341,7 @@ func (cfg *Configs) Gen() {
 		tuple.sourceCode = options.InjectImports(tuple.sourceCode)
 	}
 
-	// Inject or remove generated code documentation headers based on config // 根据配置注入或移除生成代码文档头部
+	// Inject/remove generated code documentation headers based on config // 根据配置注入或移除生成代码文档头部
 	for _, tuple := range path2codeMap {
 		tuple.sourceCode = processDoNotEditComment(tuple.sourceCode, cfg.isGenPreventEdit, cfg.generatedFromPos)
 	}
@@ -353,7 +353,7 @@ func (cfg *Configs) Gen() {
 	}
 }
 
-// processDoNotEditComment adds or removes "DO NOT EDIT" comment headers based on options
+// processDoNotEditComment adds/removes "DO NOT EDIT" comment headers based on options
 // When isGenPreventEdit is true, adds warning comments to files
 // When isGenPreventEdit is false, removes existing generated headers
 // Returns the source code with correct heading processing and spacing
@@ -389,8 +389,8 @@ func processDoNotEditComment(sourceCode []byte, isGenPreventEdit bool, generated
 }
 
 // panicSourceFileNotExist panics when the source file does not exist
-// gormcngen uses AST-based code injection which requires an existing source file
-// Panic with clear message helps users understand they need to create the file with model definitions first
+// gormcngen uses AST-based code injection which needs an existing source file
+// Panic with explicit message helps users understand: create the file with GORM struct definitions first
 //
 // panicSourceFileNotExist 当源文件不存在时触发 panic
 // gormcngen 使用基于 AST 的代码注入，需要源文件已存在
@@ -399,7 +399,7 @@ func panicSourceFileNotExist(srcPath string, pkgName string) {
 	zaplog.SUG.Debugln("Maybe you need this command to create the source file:")
 	zaplog.SUG.Debugf(`echo "package %s" > %s`, pkgName, srcPath)
 	zaplog.SUG.Debugln("Maybe it helps you to solve this problem")
-	// Target file must exist before code injection. Create the file with your model struct definition first.
+	// Target file must exist to enable code injection. Create the file with GORM struct definitions first.
 	// 目标文件必须存在才能注入代码。请先创建包含模型结构体定义的文件。
 	zaplog.LOG.Panic("gormcngen requires existing source file to enable AST-based code injection",
 		zap.String("srcPath", srcPath),

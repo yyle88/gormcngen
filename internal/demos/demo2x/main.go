@@ -11,7 +11,7 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
-	"github.com/yyle88/gormcngen/internal/demos/demo2/internal/models"
+	"github.com/yyle88/gormcngen/internal/demos/demo2x/internal/models"
 	"github.com/yyle88/gormcnm"
 	"github.com/yyle88/gormcnm/gormcnmstub"
 	"github.com/yyle88/must"
